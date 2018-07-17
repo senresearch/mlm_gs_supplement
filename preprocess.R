@@ -65,28 +65,37 @@ for (i in 1:6) {
 
 ###############################################################################
 
-for (i in 1:6) {
-  write.csv(krit_cond[[i]], 
-            file=paste0("./processed/processed_KEIO_data/p", i, 
-                        "_krit.csv"), row.names=FALSE)
-  write.csv(krit_dat[[i]], 
-            file=paste0("./processed/processed_KEIO_data/dat_p", i, 
-                        "_krit.csv"), row.names=FALSE)
-}
+krit_cond_conc_names = lapply(krit_cond, function(x){x$Cond_Conc})
+krit_mut_names = lapply(KEIO_keys, function(x){as.character(x$name)})
+
+length(do.call(c, krit_cond_conc_names))
+length(unique(do.call(c, krit_cond_conc_names)))
+
+length(do.call(c, krit_mut_names))
+length(unique(do.call(c, krit_mut_names)))
+
+sapply(krit_cond_conc_names, length)
+sapply(krit_cond_conc_names, function(x){length(unique(x))})
+
+sapply(krit_mut_names, length)
+sapply(krit_mut_names, function(x){length(unique(x))})
 
 ###############################################################################
 
-krit_cond_conc = lapply(krit_cond, function(x){x$Cond_Conc})
-krit_mut = lapply(KEIO_keys, function(x){as.character(x$name)})
-
-length(do.call(c, krit_cond_conc))
-length(unique(do.call(c, krit_cond_conc)))
-
-length(do.call(c, krit_mut))
-length(unique(do.call(c, krit_mut)))
-
-sapply(krit_cond_conc, length)
-sapply(krit_cond_conc, function(x){length(unique(x))})
-
-sapply(krit_mut, length)
-sapply(krit_mut, function(x){length(unique(x))})
+for (i in 1:6) {
+  write.csv(krit_cond[[i]], 
+            file=paste0("./processed/processed_KEIO_data/p", i, 
+                        "_krit_cond.csv"), row.names=FALSE)
+  write.csv(krit_dat[[i]], 
+            file=paste0("./processed/processed_KEIO_data/p", i, 
+                        "_krit_dat.csv"), row.names=FALSE)
+  
+  # Cond-conc
+  write.csv(krit_cond_conc_names[[i]], 
+            file=paste0("./processed/processed_KEIO_data/p", i, 
+                        "_krit_cond_conc_names.csv"), row.names=FALSE)
+  # Mutations
+  write.csv(krit_mut_names[[i]], 
+            file=paste0("./processed/processed_KEIO_data/p", i, 
+                        "_krit_mut_names.csv"), row.names=FALSE)
+}
