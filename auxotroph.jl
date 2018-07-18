@@ -304,3 +304,53 @@ for i in 1:6
   # 1/2 main effects from Normal(0,2)
   runSim(all_Xsumc[i], all_Zsumc[i], all_Xnoint[i], all_Znoint[i], i, 1/4, Normal(0,2), 1/2, Normal(0,2))
 end
+
+
+
+
+
+
+@everywhere include("../mlm_packages/GeneticScreen/src/GeneticScreen.jl")
+@everywhere using GeneticScreen
+
+using DataFrames
+
+nPerms = 1000
+for i in 1:6
+    println(string("Plate ", i))
+    
+    # Read in data for each plate
+    # Colony opacity
+    Y = readtable(string("./processed/processed_KEIO_data/p", i, "_krit_dat.csv"), 
+    	separator = ',', header=true)
+    
+    # Conditions
+    X = readtable(string("./processed/processed_KEIO_data/p", i, "_krit_cond.csv"), 
+    	separator = ',', header=true)
+    
+    # Mutant keys
+    Z = readtable(string("./processed/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
+    	separator = '\t', header=true)
+
+    MLM_data = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; isYstd=true, 
+    	XVars=[:Cond_Conc], ZVars=[:name], XTypes=["sum"], ZTypes=["sum"])
+
+    # Run matrix linear models 
+    results = mlm(MLM_data)
+    
+    # Back-transform sum contrasts
+    back_est_sum_contr!(results)
+
+    # Get t-statistics and permutation p-values
+    srand(i)
+    tStats, pVals = mlm_perms(MLM_data, nPerms)
+    
+    # Write to CSV
+    writecsv(string("./processed/p", i, "_tStats.csv"), tStats) 
+    writecsv(string("./processed/p", i, "_pVals.csv"), pVals) 
+end
+
+
+
+
+

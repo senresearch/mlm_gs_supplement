@@ -114,19 +114,19 @@ end
 
 # Read in data for each plate
 # Colony opacity
-Y = readtable("./processed/processed_KEIO_data/dat_p1_krit.csv", separator = ',', header=true)
+Y = readtable("./processed/processed_KEIO_data/p1_krit_dat.csv", separator = ',', header=true)
 
 # Conditions
-X = readtable("./processed/processed_KEIO_data/p1_krit.csv", separator = ',', header=true)
+X = readtable("./processed/processed_KEIO_data/p1_krit_cond.csv", separator = ',', header=true)
 
 # Mutant keys
-Z = readtable("./processed/dataforJane/KEIO1_KEY.csv", separator = '\t', header=true)
+Z = readtable("./processed/raw_KEIO_data/KEIO1_KEY.csv", separator = '\t', header=true)
 
-# Concatenate condition and concentration in X.
-X[:Cond_Conc] = DataArray(String, size(X,1))
-for i in 1:size(X,1)
-  X[:Cond_Conc][i] = string(X[:Condition][i]," ",X[:Concentration][i])
-end
+# # Concatenate condition and concentration in X.
+# X[:Cond_Conc] = DataArray(String, size(X,1))
+# for i in 1:size(X,1)
+#   X[:Cond_Conc][i] = string(X[:Condition][i]," ",X[:Concentration][i])
+# end
 
 
 # Standardize Y by median and IQR
@@ -137,9 +137,10 @@ for i in 1:length(iqrY)
 end
 Ystd = (Ystd.-median(Ystd,2))./iqrY
 
-# Add spatial coefficients to Z. 
-plate_center = [16.5, 24.5]
-Z = hcat(Z, power_crossprod(Z[:row]-plate_center[1], Z[:column]-plate_center[2], [1, 2, 3, 4]))
+
+# # Add spatial coefficients to Z. 
+# plate_center = [16.5, 24.5]
+# Z = hcat(Z, power_crossprod(Z[:row]-plate_center[1], Z[:column]-plate_center[2], [1, 2, 3, 4]))
 
 # Sum contrasts for X
 Xsumc = convert(Array{Float64}, contr(X[[:Cond_Conc]], [:Cond_Conc], ["sum"]))
@@ -153,6 +154,10 @@ Xnoint = convert(Array{Float64}, contr(X[[:Cond_Conc]], [:Cond_Conc], ["noint"])
 # Treatment contrast matrices, not including intercept or spatial effects, for Z
 Znoint = convert(Array{Float64}, contr(Z[[:name]], [:name], ["noint"]))
 
+
+MLM_data = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; isYstd=true, XVars=[:Cond_Conc], ZVars=[:name], XTypes=["sum"], ZTypes=["sum"])
+dat = read_plate(X[[:Cond_Conc]], Y, Z[[:row, :column, :name]]; isYstd=true, XVars=[:Cond_Conc], ZVars=[:name], XTypes=["sum"], ZTypes=["sum"], spatDegree=4)
+S_data = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; isYstd=true, XVars=[:Cond_Conc], ZVars=[:name], XTypes=["noint"], ZTypes=["noint"])
 
 
 reps = 20
