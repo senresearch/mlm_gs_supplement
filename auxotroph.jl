@@ -332,22 +332,24 @@ for i in 1:6
     Z = readtable(string("./processed/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
     	separator = '\t', header=true)
 
-    MLM_data = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; isYstd=true, 
-    	XVars=[:Cond_Conc], ZVars=[:name], XTypes=["sum"], ZTypes=["sum"])
+    MLM_data = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
+    	XcVar=:Cond_Conc, ZcVar=:name,
+    	isYstd=true, XcType="sum", ZcType="sum")
+
+    # S_data = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
+    # 	XcVar=:Cond_Conc, ZcVar=:name,
+    # 	isYstd=true, XcType="noint", ZcType="noint")
 
     # Run matrix linear models 
-    results = mlm(MLM_data)
-    
-    # Back-transform sum contrasts
-    back_est_sum_contr!(results)
+    results = mlm_backest_sum(MLM_data)
 
     # Get t-statistics and permutation p-values
     srand(i)
-    tStats, pVals = mlm_perms(MLM_data, nPerms)
+    tStats, pvals = mlm_backest_sum_perms(MLM_data, nPerms)
     
     # Write to CSV
     writecsv(string("./processed/p", i, "_tStats.csv"), tStats) 
-    writecsv(string("./processed/p", i, "_pVals.csv"), pVals) 
+    writecsv(string("./processed/p", i, "_pvals.csv"), pvals) 
 end
 
 
