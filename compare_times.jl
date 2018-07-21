@@ -1,192 +1,106 @@
-# Load source files.
-@everywhere include("dummyfun.jl")
-@everywhere include("krondiag.jl")
-@everywhere include("collins.jl")
-@everywhere include("power_crossprod.jl")
-@everywhere include("block_diag.jl")
-@everywhere include("lambda.jl")
-# Load packages.
-@everywhere using DataFrames
-@everywhere using StatsBase
-@everywhere using Distributions
+@everywhere include("../mlm_packages/GeneticScreen/src/GeneticScreen.jl")
+@everywhere using GeneticScreen
 
-# Modified version of the ls function.
-# X, Y, and Z are 2d arrays. X and Z should have the correct contrasts applied to them. 
-# interceptX and interceptZ are boolean flags indicating whether or not to include X and Z
-# intercepts (main effects). Default is true for both. 
-# var_shrink is a boolean flag indicating whether or not to apply variance shrinkage. Default false.
-# targetType is a character string ("A", "B", "C", or "D") indicating the target for variance shrinkage. 
-# Default is "C". See lambda.jl for more details. 
-@everywhere function MLM(X::Array{Float64,2}, Y::Array{Float64,2}, Z::Array{Float64,2},
-  interceptX::Bool=true, interceptZ::Bool=true, var_shrink::Bool=false, targetType::AbstractString="C")
-  if interceptX==true # Include X intercept
-    X = hcat(ones(size(X,1)), X)
-  end
-  if interceptZ==true # Include Z intercept
-    Z = hcat(ones(size(Z,1)), Z)
-  end
-  XTX = transpose(X)*X
-  ZTZ = transpose(Z)*Z
-  coeffs = transpose(ZTZ\(transpose((XTX\(transpose(X)*Y))*Z))) # LS coefficient estimate.
+using DataFrames
 
-  resid = Y-X*coeffs*transpose(Z) # Residuals
-  # Get the sigma estimate
-  if var_shrink==true # If applying variance shrinkage
-    sigma, lambda = shrinkVarEst(resid, targetType)
-    println(lambda)
-  else  # If not applying variance shrinkage
-    RSS = transpose(resid)*resid # RSS
-    sigma = RSS/size(X,1) # Estimate for sigma. Divide by n=number of samples
-  end 
-  varleft = inv(transpose(X)*X) # Estimate variance of coefficient estimates.
-  varright = transpose(ZTZ\(transpose((ZTZ\(transpose(Z)*sigma))*Z)))
-  vardiag = transpose(krondiag(varleft, varright))
+nPerms = 1000
 
-  result = Array[[coeffs] [vardiag] [sigma]]
-  return result
-end
+reps = 10 # +1 for dry run 
+mlmTimes = Array{Float64}(6, reps+1)
+STimes = Array{Float64}(6, reps+1)
+mlmPermTimes = Array{Float64}(6, reps+1)
+SPermTimes = Array{Float64}(6, reps+1)
 
-# Calls MLM and does post-processing. 
-# X, Y, and Z are 2d arrays.  X and Z should have the correct contrasts applied to them. 
-# interceptX and interceptZ are boolean flags indicating whether or not to include X and Z
-# intercepts (main effects). Default is true for both. 
-# var_shrink is a boolean flag indicating whether or not to apply variance shrinkage. Default false.
-# targetType is a character string ("A", "B", "C", or "D") indicating the target for variance shrinkage. 
-# Default is "C". See lambda.jl for more details. 
-@everywhere function my_MLM(Y,X,Z, var_shrink::Bool=false, targetType::AbstractString="C")
-  # Run MLM and get coefficient, variance, and sigma estimates
-  out = MLM(X::Array{Float64,2}, Y::Array{Float64,2}, Z::Array{Float64,2}, true, true, var_shrink, targetType)
+for i in 1:6
+    
+    println(string("Plate ", i))
 
-  # Post-processing to get the sum contrasts to be interpretable.
-  ZTZ = transpose([ones(size(Z,1)) Z])*[ones(size(Z,1)) Z]
-  varleft = inv(transpose([ones(size(X,1)) X])*[ones(size(X,1)) X])
-  varright = transpose(ZTZ\(transpose((ZTZ\(transpose([ones(size(Z,1)) Z])*out[3]))*[ones(size(Z,1)) Z])))
+    # Read in data for each plate
+    # Colony opacity
+    Y = readtable(string("./processed/processed_KEIO_data/p", i, 
+                         "_krit_dat.csv"), separator = ',', header=true) 
+    
+    # Conditions
+    X = readtable(string("./processed/processed_KEIO_data/p", i, 
+                         "_krit_cond.csv"), separator = ',', header=true) 
+    
+    # Mutant keys
+    Z = readtable(string("./processed/raw_KEIO_data/KEIO", i, 
+                         "_KEY.csv"), separator = '\t', header=true) 
 
-  C = transpose(vcat(0, -ones(size(X,2))))
-  coeffX = C*out[1]
-  varX = transpose(krondiag(C*varleft*transpose(C), varright))
+    MLMData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
+    	        	     XcVar=:Cond_Conc, ZcVar=:name,
+    	        	     isYstd=true, XcType="sum", ZcType="sum")
+        
+    SData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
+    	        	   XcVar=:Cond_Conc, ZcVar=:name,
+    	        	   isYstd=true, XcType="noint", ZcType="noint")
 
-  D = vcat(zeros(15),-ones(size(Z,2)-14))
-  coeffZ = out[1]*D
-  varZ = transpose(krondiag(varleft, transpose(D)*varright*D))
+    
+    for j in 1:(reps+1) # +1 for dry run 
+        
+        mlmTimes[i,j] = @elapsed mlm_backest_sum(MLMData)
 
-  coeffXZ = C*out[1]*D
-  varXZ = transpose(krondiag(C*varleft*transpose(C), transpose(D)*varright*D))
-  allcoeffs = vcat(out[1], coeffX)
-  allcoeffs = hcat(allcoeffs, vcat(coeffZ, coeffXZ))
-  allvar = vcat(out[2], varX)
-  allvar = hcat(allvar, vcat(varZ, varXZ))
-  tstats = allcoeffs./sqrt(allvar)
+        STimes[i,j] = @elapsed S_score(MLMData)
+    
+        srand(i)
+        mlmPermTimes[i,j] = @elapsed mlm_backest_sum_perms(MLMData, nPerms)
 
-  # Return just the interactions
-  return tstats[2:end,16:end]
-end
+        srand(i)
+        SPermTimes[i,j] = @elapsed S_score_perms(MLMData, nPerms)
 
-# Gets permutation p-values. 
-# fun is a function to call on X, Y, and Z to get test statistics. 
-# nperms is the number of permutations to run. 
-# X, Y, and Z are 2d arrays.  X and Z should have the correct contrasts applied to them. 
-# file_name is a string of the file extension to which the "real" test statistics should be written. 
-# fun_args... are addition arguments to be passed into fun
-function perm_test(fun::Function, nperms::Int64, Y::Array{Float64,2}, X::Array{Float64,2}, Z::Array{Float64,2}, fun_args...)
-  # Get the "real" test statistics and write to file_name.
-  test_stats = fun(Y, X, Z, fun_args...)
-
-  # Permute the rows of Y. For each permutation, re-run the method to get test statistics. 
-  perms = SharedArray(Float64, (size(test_stats,1))*(size(test_stats,2)), nperms)
-  @sync @parallel for j in 1:nperms
-    row_idx = shuffle(collect(1:size(Y,1)))
-    Yperms = Y[row_idx,:]
-    perms[:,j] = vec(fun(Yperms, X, Z, fun_args...))
-  end
-
-  # Get permutation p-values. 
-  pvals = SharedArray(Float64, size(test_stats))
-  abs_perms = abs(perms)
-  abs_test_stats = abs(test_stats)
-
-  @sync @parallel for k in 1:length(pvals)
-    pvals[k] = mean(abs_test_stats[k] .<= abs_perms[k,:])
-  end
-  return pvals
+    end
 end
 
 
-# Read in data for each plate
-# Colony opacity
-Y = readtable("./processed/processed_KEIO_data/p1_krit_dat.csv", separator = ',', header=true)
 
-# Conditions
-X = readtable("./processed/processed_KEIO_data/p1_krit_cond.csv", separator = ',', header=true)
-
-# Mutant keys
-Z = readtable("./processed/raw_KEIO_data/KEIO1_KEY.csv", separator = '\t', header=true)
-
-# # Concatenate condition and concentration in X.
-# X[:Cond_Conc] = DataArray(String, size(X,1))
-# for i in 1:size(X,1)
-#   X[:Cond_Conc][i] = string(X[:Condition][i]," ",X[:Concentration][i])
-# end
+# Drop the dry run
+mlmTimes = mlmTimes[:,2:end]
+# Total time
+mlmTimes = vcat(mlmTimes, sum(mlmTimes, 1))
+# Print mean
+println(mean(mlmTimes, 2))
+# Write times to CSV
+writecsv("./processed/mlm_times.csv",  
+         vcat(["plate" "mean" transpose(collect(1:reps))], 
+              hcat(["1", "2", "3", "4", "5", "6", "Total"], 
+                   mean(mlmTimes, 2), mlmTimes)))
 
 
-# Standardize Y by median and IQR
-Ystd = convert(Array{Float64,2}, Y)
-iqrY = Array(Float64, size(Ystd,1))
-for i in 1:length(iqrY)
-  iqrY = iqr(vec(Ystd[i,:]))
-end
-Ystd = (Ystd.-median(Ystd,2))./iqrY
+# Drop the dry run
+STimes = STimes[:,2:end]
+# Total time
+STimes = vcat(STimes, sum(STimes, 1))
+# Print mean
+println(mean(STimes, 2))
+# Write times to CSV
+writecsv("./processed/S_times.csv",  
+         vcat(["plate" "mean" transpose(collect(1:reps))], 
+              hcat(["1", "2", "3", "4", "5", "6", "Total"], 
+                   mean(STimes, 2), STimes)))
 
 
-# # Add spatial coefficients to Z. 
-# plate_center = [16.5, 24.5]
-# Z = hcat(Z, power_crossprod(Z[:row]-plate_center[1], Z[:column]-plate_center[2], [1, 2, 3, 4]))
-
-# Sum contrasts for X
-Xsumc = convert(Array{Float64}, contr(X[[:Cond_Conc]], [:Cond_Conc], ["sum"]))
-
-# Sum contrasts for Z, including spatial effects 
-Zsumc = convert(Array{Float64}, contr(Z[[:name]], [:name], ["sum"]))
-
-# Treatment contrast matrices, not including intercept, for X
-Xnoint = convert(Array{Float64}, contr(X[[:Cond_Conc]], [:Cond_Conc], ["noint"]))
-
-# Treatment contrast matrices, not including intercept or spatial effects, for Z
-Znoint = convert(Array{Float64}, contr(Z[[:name]], [:name], ["noint"]))
+# Drop the dry run
+mlmPermTimes = mlmPermTimes[:,2:end]
+# Total time
+mlmPermTimes = vcat(mlmPermTimes, sum(mlmPermTimes, 1))
+# Print mean
+println(mean(mlmPermTimes, 2))
+# Write times to CSV
+writecsv("./processed/mlm_perm_times.csv",  
+         vcat(["plate" "mean" transpose(collect(1:reps))], 
+              hcat(["1", "2", "3", "4", "5", "6", "Total"], 
+                   mean(mlmPermTimes, 2), mlmPermTimes)))
 
 
-MLM_data = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; isYstd=true, XVars=[:Cond_Conc], ZVars=[:name], XTypes=["sum"], ZTypes=["sum"])
-dat = read_plate(X[[:Cond_Conc]], Y, Z[[:row, :column, :name]]; isYstd=true, XVars=[:Cond_Conc], ZVars=[:name], XTypes=["sum"], ZTypes=["sum"], spatDegree=4)
-S_data = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; isYstd=true, XVars=[:Cond_Conc], ZVars=[:name], XTypes=["noint"], ZTypes=["noint"])
-
-
-reps = 20
-times_ls = Array(Float64, reps, 2)
-
-srand(50)
-my_MLM(Ystd, Xsumc, Zsumc)
-Sscore_floor(Ystd, Xnoint, Znoint)
-
-# Run matrix linear models 
-for i in 1:reps
-  times_ls[i,1] = @elapsed my_MLM(Ystd, Xsumc, Zsumc)
-  times_ls[i,2] = @elapsed Sscore_floor(Ystd, Xnoint, Znoint)
-end
-
-writecsv("./processed/times_ls.csv", times_ls)
-
-
-# Run permutations for each plate and method.
-nperms = 1000
-times_perms_ls = Array(Float64, 1, 2)
-
-srand(50)
-perm_test(my_MLM, 1, Ystd, Xsumc, Zsumc)
-perm_test(Sscore_floor, 1, Ystd, Xnoint, Znoint)
-
-# Run matrix linear models 
-times_perms_ls[1,1] = @elapsed perm_test(my_MLM, nperms, Ystd, Xsumc, Zsumc)
-
-times_perms_ls[1,2] = @elapsed perm_test(Sscore_floor, nperms, Ystd, Xnoint, Znoint)
-
-writecsv("./processed/times_perms_ls.csv", times_perms_ls)
+# Drop the dry run
+SPermTimes = SPermTimes[:,2:end]
+# Total time
+SPermTimes = vcat(SPermTimes, sum(SPermTimes, 1))
+# Print mean
+println(mean(SPermTimes, 2))
+# Write times to CSV
+writecsv("./processed/S_perm_times.csv",  
+         vcat(["plate" "mean" transpose(collect(1:reps))], 
+              hcat(["1", "2", "3", "4", "5", "6", "Total"], 
+                   mean(SPermTimes, 2), SPermTimes)))

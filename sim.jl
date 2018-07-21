@@ -74,27 +74,28 @@ for i in 1:6
     
     # Read in data for each plate
     # Colony opacity
-    Y = readtable(string("./processed/processed_KEIO_data/p", i, "_krit_dat.csv"), 
-    	separator = ',', header=true)
+    Y = readtable(string("./processed/processed_KEIO_data/p", i, 
+                  "_krit_dat.csv"), separator = ',', header=true)
     
     # Conditions
-    X = readtable(string("./processed/processed_KEIO_data/p", i, "_krit_cond.csv"), 
-    	separator = ',', header=true)
+    X = readtable(string("./processed/processed_KEIO_data/p", i, 
+                  "_krit_cond.csv"), separator = ',', header=true)
     
     # Mutant keys
     Z = readtable(string("./processed/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
-    	separator = '\t', header=true)
+                  separator = '\t', header=true)
 
     MLMData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
-    	XcVar=:Cond_Conc, ZcVar=:name,
-    	isYstd=true, XcType="sum", ZcType="sum")
+    	                 XcVar=:Cond_Conc, ZcVar=:name,
+    	                 isYstd=true, XcType="sum", ZcType="sum")
 
     Sdata = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
-    	XcVar=:Cond_Conc, ZcVar=:name,
-    	isYstd=true, XcType="noint", ZcType="noint")
+    	               XcVar=:Cond_Conc, ZcVar=:name,
+    	               isYstd=true, XcType="noint", ZcType="noint")
 
 
-    MLMSimData, SSimData = simulateData(all_Xsumc[i], all_Zsumc[i], all_Xnoint[i], all_Znoint[i], i, 1/4, Normal(0,2), 1/2, Normal(0,2))
+    MLMSimData, SSimData = simulateData(MLMData, Sdata, 1/4, Normal(0,2), 1/2, Normal(0,2))
+    # MLMSimData, SSimData = simulateData(all_Xsumc[i], all_Zsumc[i], all_Xnoint[i], all_Znoint[i], i, 1/4, Normal(0,2), 1/2, Normal(0,2))
     
     srand(i)
     tStats, pvals = mlm_backest_sum_perms(MLMSimData, nPerms)
@@ -104,9 +105,9 @@ for i in 1:6
     writecsv(string("./processed/sim_p", i, "_pvals.csv"), pvals) 
 
     srand(i)
-    SScores, SScorePvals = S_score_perms(SSimData, nPerms)
+    S, SPvals = S_score_perms(SSimData, nPerms)
     
     # Write to CSV
-    writecsv(string("./processed/sim_p", i, "_SScores.csv"), SScores) 
-    writecsv(string("./processed/sim_p", i, "_SScorePvals.csv"), SScorePvals) 
+    writecsv(string("./processed/sim_p", i, "_S.csv"), S) 
+    writecsv(string("./processed/sim_p", i, "_SPvals.csv"), SPvals) 
 end
