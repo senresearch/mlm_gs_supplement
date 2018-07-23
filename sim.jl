@@ -47,25 +47,28 @@ end
 # eDist = distributions or ranges from which the non-fixed effects should be randomly sampled.
 # Default to Normal(0,1), the standard normal.
 function make_Y(S, L, T, XNoint, ZNoint; eDist=Normal(0,1))
-  n = size(XNoint,1)
-  m = size(ZNoint,1)
-  fixed = Array{Float64}(n, m)
-  for i = 1:n 
-    for j = 1:m 
-      fixed[i,j] = (S[find(ZNoint[j,:] .== 1)] + T[find(XNoint[i,:] .== 1), find(ZNoint[j,:] .== 1)])[1]
+    n = size(XNoint,1)
+    m = size(ZNoint,1)
+    fixed = Array{Float64}(n, m)
+    for i = 1:n 
+        for j = 1:m 
+            fixed[i,j] = (S[find(ZNoint[j,:] .== 1)] + 
+            	          T[find(XNoint[i,:] .== 1), 
+            	            find(ZNoint[j,:] .== 1)])[1]
+        end
     end
-  end
-  fixed = L .+ fixed
-
-  Y = fixed + rand(eDist, n, m)
-
-  return DataFrame(Y)
+    fixed = L .+ fixed
+    
+    Y = fixed + rand(eDist, n, m)
+    
+    return DataFrame(Y)
 end
 
 
 
 function sim_data(X, Y, Z, XcVar, ZcVar;
-                  interNonzero=1/4, interDist=Normal(0,2), mainNonzero=1/2, mainDist=Normal(0,2), eDist=Normal(0,1))
+                  interNonzero=1/4, interDist=Normal(0,2), mainNonzero=1/2, 
+                  mainDist=Normal(0,2), eDist=Normal(0,1))
 
     XNoint = convert(Array{Float64}, contr(X, [XcVar], ["noint"]))
     ZNoint = convert(Array{Float64}, contr(Z, [ZcVar], ["noint"]))
@@ -116,19 +119,20 @@ for i in 1:6
 
 
     srand(10+i)
-    MLMSimData, SSimData = sim_data(X[[:Cond_Conc]], Y, Z[[:name]], :Cond_Conc, :name)
+    MLMSimData, SSimData = sim_data(X[[:Cond_Conc]], Y, Z[[:name]], 
+                                    :Cond_Conc, :name)
     
     srand(i)
     tStats, pvals = mlm_backest_sum_perms(MLMSimData, nPerms)
 
     # Write to CSV
-    writecsv(string("./processed/sim_p", i, "_tStats.csv"), tStats) 
-    writecsv(string("./processed/sim_p", i, "_pvals.csv"), pvals) 
+    writecsv(string("./processed/sim_p", i, "_tStats.csv"), tStats)
+    writecsv(string("./processed/sim_p", i, "_pvals.csv"), pvals)
 
     srand(i)
     S, SPvals = S_score_perms(SSimData, nPerms)
     
     # Write to CSV
-    writecsv(string("./processed/sim_p", i, "_S.csv"), S) 
-    writecsv(string("./processed/sim_p", i, "_SPvals.csv"), SPvals) 
+    writecsv(string("./processed/sim_p", i, "_S.csv"), S)
+    writecsv(string("./processed/sim_p", i, "_SPvals.csv"), SPvals)
 end

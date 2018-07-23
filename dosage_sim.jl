@@ -41,48 +41,45 @@ end
 
 
 function sim_exp_dos_effects(levs, beta, alpha)
-  out = Array(Float64, levs)
-
-  for i = 1:levs
-    out[i] = rand(Exponential(beta*(alpha^(i-1))))
-  end
-
-  return rand([-1, 1]) * cumsum(abs(out))
+    out = Array{Float64}(levs)
+    
+    for i = 1:levs
+        out[i] = rand(Exponential(beta*(alpha^(i-1))))
+    end
+    
+    return rand([-1, 1]) * cumsum(abs.(out))
 end
 
 
-function sim_dos_data(p, levs, reps, Z, ZcVar; beta=0.5, alpha=0.8, eDist=Normal(0,1))
+function sim_dos_data(p, levs, reps, Z, ZcVar; 
+	                  beta=0.5, alpha=0.8, eDist=Normal(0,1))
     
     ZNoint = convert(Array{Float64}, contr(Z, [ZcVar], ["noint"]))
     
     n = p*levs*reps
     q = size(ZNoint, 2)
     m = size(ZNoint, 1)
-
-    XDos = zeros(n, p)
-    for j in 1:p
-        XDos[((j-1)*levs*reps+1):(j*levs*reps),j] = repeat(collect(1:levs), outer=reps)
-    end
-    XDos = DataFrame(XDos)
     
-    chars = repeat(collect('A':'Z')[1:p], inner=reps*levs)
-    nums = repeat(collect(1:levs), outer=reps*p)
-    Cond_Conc = Array(String, n)
+    Condition = repeat(collect('A':'Z')[1:p], inner=reps*levs)
+    Concentration = repeat(collect(1:levs), outer=reps*p)
+    Cond_Conc = Array{String}(n)
     for i in 1:n
-        Cond_Conc[i] = string(chars[i], lpad(nums[i], 2, 0))
+        Cond_Conc[i] = string(Condition[i], lpad(Concentration[i], 2, 0))
     end
-    X = DataFrame(Cond_Conc=Cond_Conc, Condition=chars)
+    X = DataFrame(Cond_Conc=Cond_Conc, 
+    	          Condition=Condition, Concentration=Concentration)
 
     XSim = zeros(n, p)
     for j in 1:p
-        XSim[((j-1)*levs*reps+1):(j*levs*reps),j] = repeat(sim_exp_dos_effects(levs, beta, alpha), outer=reps)
+        XSim[((j-1)*levs*reps+1):(j*levs*reps),j] = 
+            repeat(sim_exp_dos_effects(levs, beta, alpha), outer=reps)
     end
     
     B = reshape(sim_effect(p*q, 1/4, Normal(0,1/2)), p, q)
 
     YSim = DataFrame(XSim*B*transpose(ZNoint) + rand(eDist, n, m))
-
-    return B, XDos, X, YSim
+    
+    return B, X, YSim
 end
 
 
@@ -101,18 +98,21 @@ for i in 1:6
                   separator = '\t', header=true)
 
     srand(10+i)
-    B, XDos, X, YSim = sim_dos_data(p, levs, reps, Z[[:name]], :name)
+    B, X, YSim = sim_dos_data(p, levs, reps, Z[[:name]], :name)
+
     
-    
-    MLMDosSimData = read_plate(XDos, YSim, Z[[:name]]; 
-                               ZcVar=:name, ZcType="sum", isYstd=true)
+    MLMDosSimData = read_plate(X, YSim, Z[[:name]]; 
+                               ZcVar=:name, ZcType="sum", 
+                               isXDos=true, XconditionVar=:Condition, 
+                               XconcentrationVar=:Concentration, isYstd=true)
 
     srand(i)
-    tStatsDos, pvalsDos = mlm_backest_sum_perms(MLMDosSimData, nPerms; isXSum=false)
+    tStatsDos, pvalsDos = mlm_backest_sum_perms(MLMDosSimData, nPerms; 
+    	                                        isXSum=false)
 
     # Write to CSV
-    writecsv(string("./processed/dos_sim_p", i, "_tStatsDos.csv"), tStatsDos) 
-    writecsv(string("./processed/dos_sim_p", i, "_pvalsDos.csv"), pvalsDos) 
+    writecsv(string("./processed/dos_sim_p", i, "_tStatsDos.csv"), tStatsDos)
+    writecsv(string("./processed/dos_sim_p", i, "_pvalsDos.csv"), pvalsDos)
 
 
     MLMSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
@@ -123,8 +123,8 @@ for i in 1:6
     tStats, pvals = mlm_backest_sum_perms(MLMSimData, nPerms)
 
     # Write to CSV
-    writecsv(string("./processed/dos_sim_p", i, "_tStats.csv"), tStats) 
-    writecsv(string("./processed/dos_sim_p", i, "_pvals.csv"), pvals) 
+    writecsv(string("./processed/dos_sim_p", i, "_tStats.csv"), tStats)
+    writecsv(string("./processed/dos_sim_p", i, "_pvals.csv"), pvals)
 
 
     MLMCondSimData = read_plate(X[[:Condition]], YSim, Z[[:name]]; 
@@ -135,8 +135,8 @@ for i in 1:6
     tStatsCond, pvalsCond = mlm_backest_sum_perms(MLMCondSimData, nPerms)
 
     # Write to CSV
-    writecsv(string("./processed/dos_sim_p", i, "_tStatsCond.csv"), tStatsCond) 
-    writecsv(string("./processed/dos_sim_p", i, "_pvalsCond.csv"), pvalsCond) 
+    writecsv(string("./processed/dos_sim_p", i, "_tStatsCond.csv"), tStatsCond)
+    writecsv(string("./processed/dos_sim_p", i, "_pvalsCond.csv"), pvalsCond)
 
 
     SSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
@@ -147,8 +147,8 @@ for i in 1:6
     S, SPvals = S_score_perms(SSimData, nPerms)
     
     # Write to CSV
-    writecsv(string("./processed/dos_sim_p", i, "_S.csv"), S) 
-    writecsv(string("./processed/dos_sim_p", i, "_SPvals.csv"), SPvals) 
+    writecsv(string("./processed/dos_sim_p", i, "_S.csv"), S)
+    writecsv(string("./processed/dos_sim_p", i, "_SPvals.csv"), SPvals)
 
 
     SCondSimData = read_plate(X[[:Condition]], YSim, Z[[:name]]; 
@@ -159,8 +159,8 @@ for i in 1:6
     SCond, SPvalsCond = S_score_perms(SCondSimData, nPerms)
     
     # Write to CSV
-    writecsv(string("./processed/dos_sim_p", i, "_SCond.csv"), SCond) 
-    writecsv(string("./processed/dos_sim_p", i, "_SPvalsCond.csv"), SPvalsCond) 
+    writecsv(string("./processed/dos_sim_p", i, "_SCond.csv"), SCond)
+    writecsv(string("./processed/dos_sim_p", i, "_SPvalsCond.csv"), SPvalsCond)
     
     # Write simualted B to CSV 
     writecsv(string("./processed/dos_sim_p", i, "_B.csv"), B)

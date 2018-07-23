@@ -99,11 +99,12 @@ for i in 1:6
                             ZcVar=:name, ZcType="sum", isYstd=true)
 
     srand(i)
-    tStatsDos, pvalsDos = mlm_backest_sum_perms(MLMDosData, nPerms; isXSum=false)
+    tStatsDos, pvalsDos = mlm_backest_sum_perms(MLMDosData, nPerms; 
+    	                                        isXSum=false)
 
     # Write to CSV
-    writecsv(string("./processed/p", i, "_tStatsDos.csv"), tStatsDos) 
-    writecsv(string("./processed/p", i, "_pvalsDos.csv"), pvalsDos) 
+    writecsv(string("./processed/p", i, "_tStatsDos.csv"), tStatsDos)
+    writecsv(string("./processed/p", i, "_pvalsDos.csv"), pvalsDos)
 
 
     MLMData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
@@ -114,8 +115,8 @@ for i in 1:6
     tStats, pvals = mlm_backest_sum_perms(MLMData, nPerms)
 
     # Write to CSV
-    writecsv(string("./processed/p", i, "_tStats.csv"), tStats) 
-    writecsv(string("./processed/p", i, "_pvals.csv"), pvals) 
+    writecsv(string("./processed/p", i, "_tStats.csv"), tStats)
+    writecsv(string("./processed/p", i, "_pvals.csv"), pvals)
 
 
     MLMCondData = read_plate(X[[:Condition]], Y, Z[[:name]]; 
@@ -126,8 +127,8 @@ for i in 1:6
     tStatsCond, pvalsCond = mlm_backest_sum_perms(MLMCondData, nPerms)
 
     # Write to CSV
-    writecsv(string("./processed/p", i, "_tStatsCond.csv"), tStatsCond) 
-    writecsv(string("./processed/p", i, "_pvalsCond.csv"), pvalsCond) 
+    writecsv(string("./processed/p", i, "_tStatsCond.csv"), tStatsCond)
+    writecsv(string("./processed/p", i, "_pvalsCond.csv"), pvalsCond)
 
 
     SData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
@@ -138,8 +139,8 @@ for i in 1:6
     S, SPvals = S_score_perms(SData, nPerms)
     
     # Write to CSV
-    writecsv(string("./processed/p", i, "_S.csv"), S) 
-    writecsv(string("./processed/p", i, "_SPvals.csv"), SPvals) 
+    writecsv(string("./processed/p", i, "_S.csv"), S)
+    writecsv(string("./processed/p", i, "_SPvals.csv"), SPvals)
 
 
     SCondData = read_plate(X[[:Condition]], Y, Z[[:name]]; 
@@ -150,7 +151,7 @@ for i in 1:6
     SCond, SPvalsCond = S_score_perms(SCondData, nPerms)
     
     # Write to CSV
-    writecsv(string("./processed/p", i, "_SCond.csv"), SCond) 
-    writecsv(string("./processed/p", i, "_SPvalsCond.csv"), SPvalsCond) 
+    writecsv(string("./processed/p", i, "_SCond.csv"), SCond)
+    writecsv(string("./processed/p", i, "_SPvalsCond.csv"), SPvalsCond)
     
 end
