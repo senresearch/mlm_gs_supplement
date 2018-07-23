@@ -6,6 +6,39 @@ using DataFrames
 using Distributions
 
 
+"""
+    sim_effect(n, propNonzero, dist)
+
+Simulate effects with a given proportion of nonzero effects drawn from some 
+distribution. The remaining effects will be set to zero.
+
+# Arguments 
+
+- n = length of 1d effect array. 
+- prop_nonzero = proportion of nonzero effects. Defaults to 0.5.
+- dist = distribution from which the nonzero effects should be simulated. 
+  Defaults to Normal(0,2). 
+
+# Value
+
+1d array of effects 
+
+"""
+
+function sim_effect(n::Int64, propNonzero::Float64=0.5, 
+                     dist::Distribution=Normal(0,2))
+    # Initialize vector for storing effects 
+    effect = zeros(n)
+    
+    # Randomly sample indices of nonzero effects
+    idx = sample(1:n, convert(Integer, round(n*propNonzero)); replace=false)
+    
+    # Simulate and assign nonzero effects  
+    effect[idx] = rand(dist, convert(Integer, round(n*propNonzero)))
+    
+    return effect
+end
+
 
 function sim_exp_dos_effects(levs, beta, alpha)
   out = Array(Float64, levs)
@@ -19,6 +52,7 @@ end
 
 
 function sim_dos_data(p, levs, reps, Z, ZcVar; beta=0.5, alpha=0.8, eDist=Normal(0,1))
+    
     ZNoint = convert(Array{Float64}, contr(Z, [ZcVar], ["noint"]))
     
     n = p*levs*reps
@@ -37,22 +71,16 @@ function sim_dos_data(p, levs, reps, Z, ZcVar; beta=0.5, alpha=0.8, eDist=Normal
     for i in 1:n
         Cond_Conc[i] = string(chars[i], lpad(nums[i], 2, 0))
     end
-    X = DataFrame(Cond_Conc=Cond_Conc, Cond=chars)
-
-  # Xsumc = convert(Array{Float64}, contr(X[[:Cond_Conc]], [:Cond_Conc], ["sum"]))
-  # Xnoint = convert(Array{Float64}, contr(X[[:Cond_Conc]], [:Cond_Conc], ["noint"]))
-
-  # Xsumc_cond = convert(Array{Float64}, contr(X[[:Cond]], [:Cond], ["sum"]))
-  # Xnoint_cond = convert(Array{Float64}, contr(X[[:Cond]], [:Cond], ["noint"]))
+    X = DataFrame(Cond_Conc=Cond_Conc, Condition=chars)
 
     XSim = zeros(n, p)
     for j in 1:p
         XSim[((j-1)*levs*reps+1):(j*levs*reps),j] = repeat(sim_exp_dos_effects(levs, beta, alpha), outer=reps)
     end
     
-    B = reshape(makeEffect(p*q, 1/4, Normal(0,1/2)), p, q)
+    B = reshape(sim_effect(p*q, 1/4, Normal(0,1/2)), p, q)
 
-    YSim = DataFrame(XSim*B*transpose(Znoint) + rand(eDist, n, m))
+    YSim = DataFrame(XSim*B*transpose(ZNoint) + rand(eDist, n, m))
 
     return B, XDos, X, YSim
 end
@@ -60,8 +88,8 @@ end
 
 
 p = 10 
-reps = 3
 levs = 3
+reps = 3
 
 nPerms = 1000
 for i in 1:6
@@ -69,17 +97,18 @@ for i in 1:6
     
     # Read in data for each plate
     # Mutant keys
-    Z = readtable("./processed/dataforJane/KEIO1_KEY.csv", separator = '\t', header=true)
+    Z = readtable(string("./processed/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
+                  separator = '\t', header=true)
 
     srand(10+i)
-    B, XDos, X, YSim = sim_dos_data(p, levs, reps, Z, :name])
-
+    B, XDos, X, YSim = sim_dos_data(p, levs, reps, Z[[:name]], :name)
+    
     
     MLMDosSimData = read_plate(XDos, YSim, Z[[:name]]; 
                                ZcVar=:name, ZcType="sum", isYstd=true)
 
     srand(i)
-    tStatsDos, pvalsDos = mlm_backest_sum_perms(MLMSimData, nPerms; isXSum=false)
+    tStatsDos, pvalsDos = mlm_backest_sum_perms(MLMDosSimData, nPerms; isXSum=false)
 
     # Write to CSV
     writecsv(string("./processed/dos_sim_p", i, "_tStatsDos.csv"), tStatsDos) 
@@ -98,8 +127,8 @@ for i in 1:6
     writecsv(string("./processed/dos_sim_p", i, "_pvals.csv"), pvals) 
 
 
-    MLMCondSimData = read_plate(X[[:Cond]], YSim, Z[[:name]]; 
-                                XcVar=:Cond, ZcVar=:name,
+    MLMCondSimData = read_plate(X[[:Condition]], YSim, Z[[:name]]; 
+                                XcVar=:Condition, ZcVar=:name,
                                 XcType="sum", ZcType="sum", isYstd=true)
 
     srand(i)
@@ -122,8 +151,8 @@ for i in 1:6
     writecsv(string("./processed/dos_sim_p", i, "_SPvals.csv"), SPvals) 
 
 
-    SCondSimData = read_plate(X[[:Cond]], YSim, Z[[:name]]; 
-                              XcVar=:Cond, ZcVar=:name,
+    SCondSimData = read_plate(X[[:Condition]], YSim, Z[[:name]]; 
+                              XcVar=:Condition, ZcVar=:name,
                               XcType="noint", ZcType="noint", isYstd=true)
 
     srand(i)
@@ -134,6 +163,6 @@ for i in 1:6
     writecsv(string("./processed/dos_sim_p", i, "_SPvalsCond.csv"), SPvalsCond) 
     
     # Write simualted B to CSV 
-    writecsv("./processed/dos_sim_B.csv", B)
+    writecsv(string("./processed/dos_sim_p", i, "_B.csv"), B)
     
 end
