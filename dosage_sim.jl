@@ -101,10 +101,10 @@ for i in 1:6
     B, X, YSim = sim_dos_data(p, levs, reps, Z[[:name]], :name)
 
     
-    MLMDosSimData = read_plate(X, YSim, Z[[:name]]; 
-                               ZcVar=:name, ZcType="sum", 
-                               isXDos=true, XconditionVar=:Condition, 
-                               XconcentrationVar=:Concentration, isYstd=true)
+    MLMDosSimData = read_plate(X[[:Condition, :Concentration]], YSim, 
+                               Z[[:name]]; ZcVar=:name, ZcType="sum", 
+                               isXDos=true, XConditionVar=:Condition, 
+                               XConcentrationVar=:Concentration, isYstd=true)
 
     srand(i)
     tStatsDos, pvalsDos = mlm_backest_sum_perms(MLMDosSimData, nPerms; 
