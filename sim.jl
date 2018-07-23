@@ -2,63 +2,92 @@
 @everywhere using GeneticScreen
 
 using DataFrames
-# using MultipleTesting
 
+using Distributions
 
-# Function used to generate an effect.
-# length = length of the vector to be returned (the number of effects).
-# nonzero = number between 0 and 1 indicating the fraction of nonzero effects. Defaults to 0.5
-# dist = a distribution or range from which the nonzero effects should be randomly sampled.
-# Defaults to Normal(0,2), the normal distribution with mean 0 and standard deviation 2.
-function makeEffect(length, nonzero=0.5, dist=Normal(0,2))
-  effect = zeros(length)
-  effect[sample(1:length, convert(Integer,round(length*nonzero)); replace=false)] = rand(dist, convert(Integer,round(length*nonzero)))
-  return effect
+"""
+    sim_effect(n, propNonzero, dist)
+
+Simulate effects with a given proportion of nonzero effects drawn from some 
+distribution. The remaining effects will be set to zero.
+
+# Arguments 
+
+- n = length of 1d effect array. 
+- prop_nonzero = proportion of nonzero effects. Defaults to 0.5.
+- dist = distribution from which the nonzero effects should be simulated. 
+  Defaults to Normal(0,2). 
+
+# Value
+
+1d array of effects 
+
+"""
+
+function sim_effect(n::Int64, propNonzero::Float64=0.5, 
+                     dist::Distribution=Normal(0,2))
+    # Initialize vector for storing effects 
+    effect = zeros(n)
+    
+    # Randomly sample indices of nonzero effects
+    idx = sample(1:n, convert(Integer, round(n*propNonzero)); replace=false)
+    
+    # Simulate and assign nonzero effects  
+    effect[idx] = rand(dist, convert(Integer, round(n*propNonzero)))
+    
+    return effect
 end
+
+
+
 
 # Function to set up the Yijs in a simulation.
 # nm = dimensions of Y as a tuple
 # fixed = fixed effects for Y, should have same dimensions as nm
-# rdist, cdist, and edist = distributions or ranges from which the non-fixed effects should be randomly sampled.
+# eDist = distributions or ranges from which the non-fixed effects should be randomly sampled.
 # Default to Normal(0,1), the standard normal.
-function makeY(S, L, T, Xnoint, Znoint, edist=Normal(0,1))
-  n = size(Xnoint,1)
-  m = size(Znoint,1)
-  fixed = Array(Float64, n, m)
-  for k = 1:n 
-    for l = 1:m 
-      fixed[k,l] = (S[find(Znoint[l,:] .== 1)] + T[find(Xnoint[k,:] .== 1),find(Znoint[l,:] .== 1)])[1]
+function make_Y(S, L, T, XNoint, ZNoint; eDist=Normal(0,1))
+  n = size(XNoint,1)
+  m = size(ZNoint,1)
+  fixed = Array{Float64}(n, m)
+  for i = 1:n 
+    for j = 1:m 
+      fixed[i,j] = (S[find(ZNoint[j,:] .== 1)] + T[find(XNoint[i,:] .== 1), find(ZNoint[j,:] .== 1)])[1]
     end
   end
   fixed = L .+ fixed
 
-  Y = fixed + rand(edist, n, m)
-  for row in 1:n
-    Y[row,:] = (Y[row,:]-median(vec(Y[row,:])))/iqr(vec(Y[row,:]))
-  end 
+  Y = fixed + rand(eDist, n, m)
 
-  return Y
+  return DataFrame(Y)
 end
 
 
 
-function simulateData(Xsumc, Zsumc, Xnoint, Znoint, fname, inter_nonzero=1/4, inter_dist=Normal(0,2), main_nonzero=1/2, main_dist=Normal(0,2), 
-  nperms=1000, seed_sim=30, seed_perms=50)
+function sim_data(X, Y, Z, XcVar, ZcVar;
+                  interNonzero=1/4, interDist=Normal(0,2), mainNonzero=1/2, mainDist=Normal(0,2), eDist=Normal(0,1))
 
-  n = size(Xnoint, 1)
-  m = size(Znoint, 1)
-  p = size(Xnoint, 2)
-  q = size(Znoint, 2)
+    XNoint = convert(Array{Float64}, contr(X, [XcVar], ["noint"]))
+    ZNoint = convert(Array{Float64}, contr(Z, [ZcVar], ["noint"]))
+    
+    n = size(XNoint, 1)
+    m = size(ZNoint, 1)
+    p = size(XNoint, 2)
+    q = size(ZNoint, 2)
+    
+    S = sim_effect(q, mainNonzero, mainDist) # Column main effects. 1/2 nonzero with SD 2. 
+    L = sim_effect(n, 1.0, mainDist) # Plate effects. SD 2. 
+    T = reshape(sim_effect(p*q, interNonzero, interDist), p, q) # Interaction effects
 
-  srand(seed_sim)
-  S = makeEffect(q, main_nonzero, main_dist) # Column main effects. 1/2 nonzero with SD 2. 
-  L = makeEffect(n, 1, main_dist) # Plate effects. SD 2. 
-  T = reshape(makeEffect((p)*(q), inter_nonzero, inter_dist), p, q) # Interaction effects
+    YSim = make_Y(S, L, T, XNoint, ZNoint; eDist=eDist)
 
-  Ystd = makeY(S, L, T, Xnoint, Znoint)
+    MLMSimData = read_plate(X, YSim, Z; 
+    	                    XcVar=XcVar, ZcVar=ZcVar,
+    	                    XcType="sum", ZcType="sum", isYstd=true)
 
-  MLMSimData = RawData(Response(Ystd), Predictors(Xsumc, Zsumc))
-  SSimData = RawData(Response(Ystd), Predictors(Xnoint, Znoint))
+    SSimData = read_plate(X, YSim, Z; 
+    	                  XcVar=XcVar, ZcVar=ZcVar,
+    	                  XcType="noint", ZcType="noint", isYstd=true)
 
   return MLMSimData, SSimData
 end
@@ -85,17 +114,9 @@ for i in 1:6
     Z = readtable(string("./processed/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
                   separator = '\t', header=true)
 
-    MLMData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
-    	                 XcVar=:Cond_Conc, ZcVar=:name,
-    	                 isYstd=true, XcType="sum", ZcType="sum")
 
-    Sdata = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
-    	               XcVar=:Cond_Conc, ZcVar=:name,
-    	               isYstd=true, XcType="noint", ZcType="noint")
-
-
-    MLMSimData, SSimData = simulateData(MLMData, Sdata, 1/4, Normal(0,2), 1/2, Normal(0,2))
-    # MLMSimData, SSimData = simulateData(all_Xsumc[i], all_Zsumc[i], all_Xnoint[i], all_Znoint[i], i, 1/4, Normal(0,2), 1/2, Normal(0,2))
+    srand(10+i)
+    MLMSimData, SSimData = sim_data(X[[:Cond_Conc]], Y, Z[[:name]], :Cond_Conc, :name)
     
     srand(i)
     tStats, pvals = mlm_backest_sum_perms(MLMSimData, nPerms)
