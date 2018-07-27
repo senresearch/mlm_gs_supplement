@@ -1,8 +1,31 @@
+# Matrix linear models for genetic screening data
 @everywhere include("../mlm_packages/GeneticScreen/src/GeneticScreen.jl")
 @everywhere using GeneticScreen
 
+# DataFrames
 using DataFrames
 
+
+"""
+    get_XDos(X, conditionVar, concentrationVar)
+
+Specialized function that converts condition variables from the Keio plates 
+to dosage slopes
+
+# Arguments
+
+- X = DataFrame with at least two categorical variables: conditions, specified 
+  by `conditionVar`, and concentrations, specified by `concentrationVar`
+- conditionVar = Symbol for the categorical condition variable in `X` to use 
+  for dosage slopes. 
+- concentrationVar = Symbol for the categorical concentration variable in `X` 
+  to use for dosage slopes. 
+
+# Value
+
+DataFrame
+
+"""
 
 function get_XDos(X, conditionVar, concentrationVar)
 
@@ -16,22 +39,30 @@ function get_XDos(X, conditionVar, concentrationVar)
     
     # Dictionary to keep track of order of SI prefixes
     SIDict = Dict('m' => 4, 'u' => 3, 'n' => 2, 'p' =>1)
-    # Initialize empty array of slopes
+    # Initialize array of slopes
     XDos = zeros(size(X, 1), length(allConds))
     
+    # Iterate through conditions and assign slopes for concentrations
     for i in 1:length(allConds)
         if numLevels[i] == 1
+            # If there is only one concentration level, there are no true 
+            # slopes; set all levels to 1. 
             XDos[(X[conditionVar] .== allConds[i]) .& 
                  (X[concentrationVar] .== unique(concs[i])[1]), i] = 1
         else 
-            # For every condition, split the concentration levels on "sec", "%", and spaces. 
+            # For every condition, split the concentration levels on 
+            # "sec", "%", and spaces. 
             splits = [split(x, r"sec|%|\s", keep=false) 
                       for x in unique(concs[i])]
+            
             # If there is only one split for each concentration level 
-            # or the second split for each level (presumably a unit) is the same for all
+            # or the second split for each level (presumably a unit) is the 
+            # same for all levels
             if (all([length(spl) for spl in splits] .== 1) || 
             	all([spl[2] for spl in splits] .== splits[1][2]))
-                # Check that if the first split is non-numeric, that it is high/low
+                # Check that if the first split is non-numeric, that it is 
+                # `high` or `low`. Then order the splits so that `low` comes 
+                # before `high`. 
                 if (all([isnull(tryparse(Float64, spl[1])) for spl in splits]))
                     if (all([spl[1] in ["high", "low"] for spl in splits]))
                         idx = sortperm([spl[1] for spl in splits], rev=true)
@@ -39,20 +70,24 @@ function get_XDos(X, conditionVar, concentrationVar)
                         print(splits)
                         error("You need to create a different case")
                     end
-                # Otherwise, sort on the first split, assuming that it is a numeric value
+                # Otherwise, the first split is a numeric value and assumed 
+                # to indicate a measurement of concentration. Sort on the 
+                # first split, assuming that concentration increases with the 
+                # magnitude of the first split.
                 else
                     idx = sortperm([parse(Float64, spl[1]) for spl in splits])
                 end
 
-            # If the first character in each of the second splits is an SI prefixes
-            # Sort first by SI prefix (as indicated by the dicationary) and then within each prefix. 
+            # If the first character in each of the second splits is an SI 
+            # prefix, sort first by SI prefix (as indicated by the 
+            # dictionary) and then sort the first splits within each prefix. 
             elseif (all([spl[2][1] in ['m','u','n','p'] for spl in splits]))
                 A = hcat([SIDict[spl[2][1]] for spl in splits], 
                          [parse(spl[1]) for spl in (splits)],
                           collect(1:length(splits)))
                 idx = sortrows(A, by=x->(x[1],x[2]))[:,3]
 
-            # Raise an error if neither case was met. 
+            # Raise an error if no case was met. 
             else
                 print(splits)
                 error("You need to create a different case")
@@ -70,13 +105,11 @@ function get_XDos(X, conditionVar, concentrationVar)
 end
 
 
-
-
-
-
+# Number of permutations 
 nPerms = 1000
+
+# Iterate through the six plates
 for i in 1:6
-    println(string("Plate ", i))
     
     # Read in data for each plate
     # Colony opacity
@@ -93,63 +126,58 @@ for i in 1:6
     
     # Dosage slopes
     XDos = get_XDos(X, :Condition, :Concentration)
-
-    
+    # Put together RawData object for MLM with dosage slopes
     MLMDosData = read_plate(XDos, Y, Z[[:name]]; 
                             ZcVar=:name, ZcType="sum", isYstd=true)
-
+    # Run matrix linear models
     srand(i)
     tStatsDos, pvalsDos = mlm_backest_sum_perms(MLMDosData, nPerms; 
     	                                        isXSum=false)
-
     # Write to CSV
     writecsv(string("./processed/p", i, "_tStatsDos.csv"), tStatsDos)
     writecsv(string("./processed/p", i, "_pvalsDos.csv"), pvalsDos)
-
-
+    
+    # Put together RawData object for MLM
     MLMData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
                             XcVar=:Cond_Conc, ZcVar=:name,
                             XcType="sum", ZcType="sum", isYstd=true)
-
+    # Run matrix linear models
     srand(i)
     tStats, pvals = mlm_backest_sum_perms(MLMData, nPerms)
-
     # Write to CSV
     writecsv(string("./processed/p", i, "_tStats.csv"), tStats)
     writecsv(string("./processed/p", i, "_pvals.csv"), pvals)
-
-
+    
+    # Put together RawData object for MLM with only conditions encoded in `X`
     MLMCondData = read_plate(X[[:Condition]], Y, Z[[:name]]; 
                                 XcVar=:Condition, ZcVar=:name,
                                 XcType="sum", ZcType="sum", isYstd=true)
-
+    # Run matrix linear models
     srand(i)
     tStatsCond, pvalsCond = mlm_backest_sum_perms(MLMCondData, nPerms)
-
     # Write to CSV
     writecsv(string("./processed/p", i, "_tStatsCond.csv"), tStatsCond)
     writecsv(string("./processed/p", i, "_pvalsCond.csv"), pvalsCond)
-
-
+    
+    # Put together RawData object for S scores
     SData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
                           XcVar=:Cond_Conc, ZcVar=:name,
                           XcType="noint", ZcType="noint", isYstd=true)
-
+    # Run S scores
     srand(i)
     S, SPvals = S_score_perms(SData, nPerms)
-    
     # Write to CSV
     writecsv(string("./processed/p", i, "_S.csv"), S)
     writecsv(string("./processed/p", i, "_SPvals.csv"), SPvals)
-
-
+    
+    # Put together RawData object for S scores with only conditions encoded in 
+    # `X` 
     SCondData = read_plate(X[[:Condition]], Y, Z[[:name]]; 
                               XcVar=:Condition, ZcVar=:name,
                               XcType="noint", ZcType="noint", isYstd=true)
-
+    # Run S scores
     srand(i)
     SCond, SPvalsCond = S_score_perms(SCondData, nPerms)
-    
     # Write to CSV
     writecsv(string("./processed/p", i, "_SCond.csv"), SCond)
     writecsv(string("./processed/p", i, "_SPvalsCond.csv"), SPvalsCond)
