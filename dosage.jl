@@ -132,6 +132,7 @@ for i in 1:6
     # Run matrix linear models
     srand(i)
     tStatsDos, pvalsDos = mlm_backest_sum_perms(MLMDosData, nPerms; 
+    	                                        isXIntercept=false, 
     	                                        isXSum=false)
     # Write to CSV
     writecsv(string("./processed/p", i, "_tStatsDos.csv"), tStatsDos)
