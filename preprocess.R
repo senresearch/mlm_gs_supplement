@@ -91,11 +91,13 @@ for (i in 1:6) {
                         "_krit_dat.csv"), row.names=FALSE)
   
   # Cond-conc
-  write.csv(krit_cond_conc_names[[i]], 
-            file=paste0("./processed/processed_KEIO_data/p", i, 
-                        "_krit_cond_conc_names.csv"), row.names=FALSE)
+  write.table(krit_cond_conc_names[[i]], 
+              file=paste0("./processed/processed_KEIO_data/p", i, 
+                          "_krit_cond_conc_names.csv"), 
+              sep=",", row.names=FALSE, col.names=FALSE)
   # Mutations
-  write.csv(krit_mut_names[[i]], 
-            file=paste0("./processed/processed_KEIO_data/p", i, 
-                        "_krit_mut_names.csv"), row.names=FALSE)
+  write.table(krit_mut_names[[i]], 
+              file=paste0("./processed/processed_KEIO_data/p", i, 
+                          "_krit_mut_names.csv"), 
+              sep=",", row.names=FALSE, col.names=FALSE)
 }
