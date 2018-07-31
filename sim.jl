@@ -71,7 +71,7 @@ Simulate response matrix Y using given main and interaction effects
 
 """
 
-function make_Y(condEff::Array{Float64,2}, mutEff::Array{Float64,2}, 
+function make_Y(condEff::Array{Float64,1}, mutEff::Array{Float64,1}, 
                 interactions::Array{Float64,2}, 
                 XNoint::Array{Float64,2}, ZNoint::Array{Float64,2}; 
                 eDist=Normal(0,1))
@@ -165,7 +165,7 @@ function sim_data(X::DataFrames.DataFrame, Z::DataFrames.DataFrame,
     # Simulate Y response matrix
     YSim = make_Y(condEff, mutEff, interactions, XNoint, ZNoint; eDist=eDist)
     
-    return interactions, Ysim
+    return interactions, YSim
 end
 
 
@@ -194,13 +194,13 @@ for i in 1:6
                                   :Cond_Conc, :name)
     
     # Put together RawData object for MLM
-    MLMSimData = read_plate(X, YSim, Z; 
-                            XcVar=XcVar, ZcVar=ZcVar,
+    MLMSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
+                            XcVar=:Cond_Conc, ZcVar=:name,
                             XcType="sum", ZcType="sum", isYstd=true)
     
     # Put together RawData object for S scores
-    SSimData = read_plate(X, YSim, Z; 
-                          XcVar=XcVar, ZcVar=ZcVar,
+    SSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
+                          XcVar=:Cond_Conc, ZcVar=:name,
                           XcType="noint", ZcType="noint", isYstd=true)
     
     # Run matrix linear models
