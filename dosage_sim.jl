@@ -115,7 +115,7 @@ levels; see description. Defaults to `0.5`.
 """
 
 function sim_dos_data(p::Int64, levs::Int64, reps::Int64, 
-	                  Z::DataFrames.DataFrame,, ZcVar::Symbol; 
+	                  Z::DataFrames.DataFrame, ZcVar::Symbol; 
 	                  alpha::Float64=0.8, beta::Float64=0.5, 
 	                  eDist::Distribution=Normal(0,1))
     
