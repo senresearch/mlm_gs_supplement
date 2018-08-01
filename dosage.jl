@@ -149,17 +149,6 @@ for i in 1:6
     writecsv(string("./processed/p", i, "_tStats.csv"), tStats)
     writecsv(string("./processed/p", i, "_pvals.csv"), pvals)
     
-    # Put together RawData object for MLM with only conditions encoded in `X`
-    MLMCondData = read_plate(X[[:Condition]], Y, Z[[:name]]; 
-                                XcVar=:Condition, ZcVar=:name,
-                                XcType="sum", ZcType="sum", isYstd=true)
-    # Run matrix linear models
-    srand(i)
-    tStatsCond, pvalsCond = mlm_backest_sum_perms(MLMCondData, nPerms)
-    # Write to CSV
-    writecsv(string("./processed/p", i, "_tStatsCond.csv"), tStatsCond)
-    writecsv(string("./processed/p", i, "_pvalsCond.csv"), pvalsCond)
-    
     # Put together RawData object for S scores
     SData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
                           XcVar=:Cond_Conc, ZcVar=:name,
@@ -170,17 +159,5 @@ for i in 1:6
     # Write to CSV
     writecsv(string("./processed/p", i, "_S.csv"), S)
     writecsv(string("./processed/p", i, "_SPvals.csv"), SPvals)
-    
-    # Put together RawData object for S scores with only conditions encoded in 
-    # `X` 
-    SCondData = read_plate(X[[:Condition]], Y, Z[[:name]]; 
-                              XcVar=:Condition, ZcVar=:name,
-                              XcType="noint", ZcType="noint", isYstd=true)
-    # Run S scores
-    srand(i)
-    SCond, SPvalsCond = S_score_perms(SCondData, nPerms)
-    # Write to CSV
-    writecsv(string("./processed/p", i, "_SCond.csv"), SCond)
-    writecsv(string("./processed/p", i, "_SPvalsCond.csv"), SPvalsCond)
     
 end
