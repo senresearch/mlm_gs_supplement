@@ -1,56 +1,41 @@
-library(MESS)
-library(mutoss) # For adaptive BH
+library(MESS) # AUC
+library(mutoss) # adaptive Benjamini-Hochberg
 
-# Colors and lines for plots
-mycols = c("black", "snow4", "dodgerblue3", "forestgreen", "firebrick3")
-mylines = c("dotted", "dotted", "dashed", "dotdash", "solid")
-
-
-
-# Read in all types of p-values
+# Read in MLM p-values for dosage slopes
 pvalsDos = lapply(1:6, function(i){
   read.csv(paste("./processed/dos_sim_p", i, "_pvalsDos.csv", sep=""), 
            header=FALSE)
 })
+# Read in MLM p-values 
 pvals = lapply(1:6, function(i){
   read.csv(paste("./processed/dos_sim_p", i, "_pvals.csv", sep=""), 
            header=FALSE)
 })
+# Read in MLM p-values with only conditions encoded
 pvalsCond = lapply(1:6, function(i){
   read.csv(paste("./processed/dos_sim_p", i, "_pvalsCond.csv", sep=""), 
            header=FALSE)
 })
-# SPvals = lapply(1:6, function(i){
-#   read.csv(paste("./processed/dos_sim_p", i, "_SPvals.csv", sep=""))
-# })
-# SPvalsCond = lapply(1:6, function(i){
-#   read.csv(paste("./processed/dos_sim_p", i, "_SPvalsCond.csv", sep=""))
-# })
 
-
-# Interactions
+# Read in interactions
 interactions = lapply(1:6, function(i){
   read.csv(paste("./processed/dos_sim_p", i, "_interactions.csv", sep=""), 
            header=FALSE)
 })
 
-
-# Convert p-values to adaptive BH-adjusted p-values
+# Convert MLM p-values for dosage slopes to adaptive BH-adjusted p-values
 adjPvalsDos = lapply(1:6, function(i){
   adaptiveBH(as.matrix(pvalsDos[[i]]), alpha=0.05, silent=TRUE)$adjPValues
 })
+# Convert MLM p-values to adaptive BH-adjusted p-values
 adjPvals = lapply(1:6, function(i){
   adaptiveBH(as.matrix(pvals[[i]]), alpha=0.05, silent=TRUE)$adjPValues
 })
+# Convert MLM p-values with only conditions encoded to adaptive BH-adjusted 
+# p-values
 adjPvalsCond = lapply(1:6, function(i){
   adaptiveBH(as.matrix(pvalsCond[[i]]), alpha=0.05, silent=TRUE)$adjPValues
 })
-# adjSPvals = lapply(1:6, function(i){
-#   adaptiveBH(as.matrix(SPvals[[i]]), alpha=0.05, silent=TRUE)$adjPValues
-# })
-# adjSPvalsCond = lapply(1:6, function(i){
-#   adaptiveBH(as.matrix(SPvalsCond[[i]]), alpha=0.05, silent=TRUE)$adjPValues
-# })
 
 
 B_reduce = function(B, p, levs, fun=mean) {
@@ -69,12 +54,20 @@ reps = 3 # Number of replications for each level
 # Range of FDR cutoffs
 FDRs = seq(0, 1, by=0.01)
 
+# Function to calculate TPR
+# adjP = matrix of adjusted p-values
+# interactions = matrix "true" interactions
+# FDRs = vector of FDR cutoffs
 get_tpr = function(adjP, interactions, FDRs) {
   return(sapply(FDRs, function(FDR){
     sum((adjP <= FDR) & (interactions != 0)) / sum(interactions != 0)
   }))
 }
 
+# Function to calculate FPR
+# adjP = matrix of adjusted p-values
+# interactions = matrix "true" interactions
+# FDRs = vector of FDR cutoffs
 get_fpr = function(adjP, interactions, FDRs) {
   return(sapply(FDRs, function(FDR){
     sum((adjP <= FDR) & (interactions == 0)) / sum(interactions == 0)
@@ -82,9 +75,6 @@ get_fpr = function(adjP, interactions, FDRs) {
 }
 
 
-
-# function getROC(qvals, qvals_cond, qvals_dos, B, FDR, p, levs, reps)
-# Bstack = repeat(B, inner=(levs,1))
 
 hits = ceiling(levs/2)
 
@@ -137,20 +127,29 @@ fpr = lapply(1:6, function(i) {
 names(tpr) = c("Hits13", "Hits23", "CondConc", "Cond", "DosResp")
 names(fpr) = c("Hits13", "Hits23", "CondConc", "Cond", "DosResp")
 
+
+# Colors and lines for plotting
+myCols = c("black", "snow4", "dodgerblue3", "forestgreen", "firebrick3")
+myLines = c("dotted", "dotted", "dashed", "dotdash", "solid")
+
 png("./pictures/dos3ROC_S_%01d.png", width=360, height=380)
 aucs = sapply(1:6, function(i) {
-  plot(c(0, fpr[[i]][,1]), c(0, tpr[[i]][,1]), col=mycols[1], lty=mylines[1], 
+  plot(c(0, fpr[[i]][,1]), c(0, tpr[[i]][,1]), col=myCols[1], lty=myLines[1], 
        xlab="False Positive Rate", ylab="True Positive Rate", 
        xaxs="i", yaxs="i", type="l")
-  lines(c(0, fpr[[i]][,2]), c(0, tpr[[i]][,2]), col=mycols[2], lty=mylines[2])
-  lines(c(0, fpr[[i]][,3]), c(0, tpr[[i]][,3]), col=mycols[3], lty=mylines[3])
-  lines(c(0, fpr[[i]][,4]), c(0, tpr[[i]][,4]), col=mycols[4], lty=mylines[4])
-  lines(c(0, fpr[[i]][,5]), c(0, tpr[[i]][,5]), col=mycols[5], lty=mylines[5])
+  lines(c(0, fpr[[i]][,2]), c(0, tpr[[i]][,2]), col=myCols[2], lty=myLines[2])
+  lines(c(0, fpr[[i]][,3]), c(0, tpr[[i]][,3]), col=myCols[3], lty=myLines[3])
+  lines(c(0, fpr[[i]][,4]), c(0, tpr[[i]][,4]), col=myCols[4], lty=myLines[4])
+  lines(c(0, fpr[[i]][,5]), c(0, tpr[[i]][,5]), col=myCols[5], lty=myLines[5])
+  
+  # Reference line
   abline(0, 1, col="grey")
+  # Legend for different methods
   legend(0.4, 0.375, 
          c("Dos. Resp.", "Cond.-Conc.", "Conditions", "1/3 Hits", "2/3 Hits"), 
-         col=mycols[c(5,3,4,1,2)], lty=mylines[c(5,3,4,1,2)], bty="n")
+         col=myCols[c(5,3,4,1,2)], lty=myLines[c(5,3,4,1,2)], bty="n")
   
+  # Return AUCs
   return(sapply(1:5, function(j){auc(c(0, fpr[[i]][,j]), c(0, tpr[[i]][,j]))}))
 })
 dev.off()
