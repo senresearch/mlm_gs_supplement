@@ -82,7 +82,7 @@ end
 
 
 """
-    sim_dos_data(p, levs, reps, Z, ZcVar; alpha, beta, eDist)
+    sim_dos_data(p, levs, reps, Z, ZCVar; alpha, beta, eDist)
 
 Simulate effects for the dosage levels of a single condition, where the 
 effects from the ith level are simulated from a exponential distribution with 
@@ -95,7 +95,7 @@ parameter beta*alpha^(i-1).
 - levs = number of dosage levels within each condition 
 - reps = number of replications for each level
 - Z = DataFrame with the `Z` predictor matrix (column covariates)
-- ZcVar = Symbol for the categorical variable in `Z` to be converted into 
+- ZCVar = Symbol for the categorical variable in `Z` to be converted into 
   dummy indicators for the mutants. Defaults to empty Symbol, `Symbol()`, 
   which signals that no contrasts should be created. 
 
@@ -115,13 +115,13 @@ levels; see description. Defaults to `0.5`.
 """
 
 function sim_dos_data(p::Int64, levs::Int64, reps::Int64, 
-	                  Z::DataFrames.DataFrame, ZcVar::Symbol; 
+	                  Z::DataFrames.DataFrame, ZCVar::Symbol; 
 	                  alpha::Float64=0.8, beta::Float64=0.5, 
 	                  eDist::Distribution=Normal(0,1))
     
     # Over-parameterized treatment contrasts for the levels of the column 
     # effects 
-    ZNoint = convert(Array{Float64}, contr(Z, [ZcVar], ["noint"]))
+    ZNoint = convert(Array{Float64}, contr(Z, [ZCVar], ["noint"]))
     
     # Dimensions of data
     n = p*levs*reps
@@ -183,7 +183,7 @@ for i in 1:6
     
     # Put together RawData object for MLM with dosage slopes 
     MLMDosSimData = read_plate(X[[:Condition, :Concentration]], YSim, 
-                               Z[[:name]]; ZcVar=:name, ZcType="sum", 
+                               Z[[:name]]; ZCVar=:name, ZCType="sum", 
                                isXDos=true, XConditionVar=:Condition, 
                                XConcentrationVar=:Concentration, isYstd=true)
     # Run matrix linear models
@@ -197,8 +197,8 @@ for i in 1:6
     
     # Put together RawData object for MLM
     MLMSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
-                            XcVar=:Cond_Conc, ZcVar=:name,
-                            XcType="sum", ZcType="sum", isYstd=true)
+                            XCVar=:Cond_Conc, ZCVar=:name,
+                            XCType="sum", ZCType="sum", isYstd=true)
     # Run matrix linear models
     srand(i)
     tStats, pvals = mlm_backest_sum_perms(MLMSimData, nPerms)
@@ -208,8 +208,8 @@ for i in 1:6
     
     # Put together RawData object for MLM with only conditions encoded in `X`
     MLMCondSimData = read_plate(X[[:Condition]], YSim, Z[[:name]]; 
-                                XcVar=:Condition, ZcVar=:name,
-                                XcType="sum", ZcType="sum", isYstd=true)
+                                XCVar=:Condition, ZCVar=:name,
+                                XCType="sum", ZCType="sum", isYstd=true)
     # Run matrix linear models
     srand(i)
     tStatsCond, pvalsCond = mlm_backest_sum_perms(MLMCondSimData, nPerms)

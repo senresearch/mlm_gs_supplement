@@ -101,7 +101,7 @@ end
 
 
 """
-   sim_data(X, Z, XcVar, ZcVar;
+   sim_data(X, Z, XCVar, ZCVar;
             interNonzero, interDist, mainNonzero, mainDist, eDist)
 
 Simulate interactions and response matrix Y based on structure of real data 
@@ -111,10 +111,10 @@ passed in by user
 
 - X = DataFrame with the `X` predictor matrix (row covariates)
 - Z = DataFrame with the `Z` predictor matrix (column covariates)
-- XcVar = Symbol for the categorical variable in `X` to be converted into 
+- XCVar = Symbol for the categorical variable in `X` to be converted into 
   dummy indicators for the conditions. Defaults to empty Symbol, `Symbol()`, 
   which signals that no contrasts should be created. 
-- ZcVar = Symbol for the categorical variable in `Z` to be converted into 
+- ZCVar = Symbol for the categorical variable in `Z` to be converted into 
   dummy indicators for the mutants. Defaults to empty Symbol, `Symbol()`, 
   which signals that no contrasts should be created. 
 
@@ -137,7 +137,7 @@ passed in by user
 """
 
 function sim_data(X::DataFrames.DataFrame, Z::DataFrames.DataFrame, 
-                  XcVar::Symbol, ZcVar::Symbol;
+                  XCVar::Symbol, ZCVar::Symbol;
                   interNonzero::Float64=1/4, 
                   interDist::Distribution=Normal(0,2), 
                   mainNonzero::Float64=1/2, 
@@ -146,8 +146,8 @@ function sim_data(X::DataFrames.DataFrame, Z::DataFrames.DataFrame,
     
     # Over-parameterized treatment contrasts for the levels of the row and 
     # column effects 
-    XNoint = convert(Array{Float64}, contr(X, [XcVar], ["noint"]))
-    ZNoint = convert(Array{Float64}, contr(Z, [ZcVar], ["noint"]))
+    XNoint = convert(Array{Float64}, contr(X, [XCVar], ["noint"]))
+    ZNoint = convert(Array{Float64}, contr(Z, [ZCVar], ["noint"]))
     
     # Dimensions of data
     n = size(XNoint, 1)
@@ -195,13 +195,13 @@ for i in 1:6
     
     # Put together RawData object for MLM
     MLMSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
-                            XcVar=:Cond_Conc, ZcVar=:name,
-                            XcType="sum", ZcType="sum", isYstd=true)
+                            XCVar=:Cond_Conc, ZCVar=:name,
+                            XCType="sum", ZCType="sum", isYstd=true)
     
     # Put together RawData object for S scores
     SSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
-                          XcVar=:Cond_Conc, ZcVar=:name,
-                          XcType="noint", ZcType="noint", isYstd=true)
+                          XCVar=:Cond_Conc, ZCVar=:name,
+                          XCType="noint", ZCType="noint", isYstd=true)
     
     # Run matrix linear models
     srand(i)

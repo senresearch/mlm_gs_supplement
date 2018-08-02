@@ -128,7 +128,7 @@ for i in 1:6
     XDos = get_XDos(X, :Condition, :Concentration)
     # Put together RawData object for MLM with dosage slopes
     MLMDosData = read_plate(XDos, Y, Z[[:name]]; 
-                            ZcVar=:name, ZcType="sum", isYstd=true)
+                            ZCVar=:name, ZCType="sum", isYstd=true)
     # Run matrix linear models
     srand(i)
     tStatsDos, pvalsDos = mlm_backest_sum_perms(MLMDosData, nPerms; 
@@ -140,8 +140,8 @@ for i in 1:6
     
     # Put together RawData object for MLM
     MLMData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
-                            XcVar=:Cond_Conc, ZcVar=:name,
-                            XcType="sum", ZcType="sum", isYstd=true)
+                            XCVar=:Cond_Conc, ZCVar=:name,
+                            XCType="sum", ZCType="sum", isYstd=true)
     # Run matrix linear models
     srand(i)
     tStats, pvals = mlm_backest_sum_perms(MLMData, nPerms)
@@ -151,8 +151,8 @@ for i in 1:6
     
     # Put together RawData object for S scores
     SData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
-                          XcVar=:Cond_Conc, ZcVar=:name,
-                          XcType="noint", ZcType="noint", isYstd=true)
+                          XCVar=:Cond_Conc, ZCVar=:name,
+                          XCType="noint", ZCType="noint", isYstd=true)
     # Run S scores
     srand(i)
     S, SPvals = S_score_perms(SData, nPerms)

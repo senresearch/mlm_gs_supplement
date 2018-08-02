@@ -36,13 +36,13 @@ for i in 1:6
     
     # Put together RawData object for MLM 
     MLMData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
-    	        	     XcVar=:Cond_Conc, ZcVar=:name,
-    	        	     isYstd=true, XcType="sum", ZcType="sum")
+    	        	     XCVar=:Cond_Conc, ZCVar=:name,
+    	        	     isYstd=true, XCType="sum", ZCType="sum")
     
     # Put together RawData object for S scores
     SData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
-    	        	   XcVar=:Cond_Conc, ZcVar=:name,
-    	        	   isYstd=true, XcType="noint", ZcType="noint")
+    	        	   XCVar=:Cond_Conc, ZCVar=:name,
+    	        	   isYstd=true, XCType="noint", ZCType="noint")
 
     
     for j in 1:(reps+1) 
