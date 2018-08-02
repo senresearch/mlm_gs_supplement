@@ -53,7 +53,9 @@ propHits = lapply(1:6, function(i) {
 myCols = c("black", "dodgerblue3", "firebrick3")
 myLines = c("solid", "dashed", "solid")
 
-png("./pictures/dos_propHits_%01d.png", width=360, height=380)
+png("./pictures/dos_p%01d_prop_hits.png", width=380, height=380)
+par(mar=c(4.1,4.1,1.1,1.1))
+
 invisible(sapply(1:6, function(i) {
   # Proportion of hits for MLM with dosage slopes
   plot(FDRs, propHits[[i]][,1], type="l", col=myCols[3], lty=myLines[3], 

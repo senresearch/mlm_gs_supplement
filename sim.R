@@ -12,7 +12,8 @@ SPvals = lapply(1:6, function(i){
 
 # Read in interactions
 interactions = lapply(1:6, function(i){
-  read.csv(paste("./processed/sim_p", i, "_interactions.csv", sep=""))
+  read.csv(paste("./processed/sim_p", i, "_interactions.csv", sep=""), 
+           header=FALSE)
 })
 
 # Convert MLM p-values to adaptive BH-adjusted p-values
@@ -52,6 +53,7 @@ get_fpr = function(adjP, interactions, FDRs) {
   }))
 }
 
+
 # TPR and FPR for MLM
 mlmTPR = lapply(1:6, function(i){
   get_tpr(adjPvals[[i]], interactions[[i]], FDRs)
@@ -69,8 +71,10 @@ SFPR = lapply(1:6, function(i){
 })
 
 
-png("./pictures/sim_AUC_%01d.png", 360, 380)
-aucs = sapply(1:6, function(i) {
+png("./pictures/sim_p%01d_ROC.png", 380, 380)
+par(mar=c(4.1,4.1,1.1,1.1))
+
+AUCs = sapply(1:6, function(i) {
   # ROC curve for MLM
   plot(c(0, mlmFPR[[i]]), c(0, mlmTPR[[i]]), 
        xlab="False Positive Rate", ylab="True Positive Rate", 

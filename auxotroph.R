@@ -95,7 +95,9 @@ mean(do.call(c, sapply(nicholsAuxoMin, function(x){
 nicholsAuxoMinDf = melt(nicholsAuxoMin)
 names(nicholsAuxoMinDf) = c("Cond_Conc", "Mutant", "tStat", "Plate")
 
-png("./pictures/dot_Nichols.png", 480, 340)
+png("./pictures/nichols_auxo_dot.png", 480, 320)
+par(mar=c(4.1,4.1,1.1,1.1))
+
 # Dot plot of t-statistics corresponding to Nichols auxotrophs
 plot(tStat~as.numeric(Mutant), nicholsAuxoMinDf, 
      xaxt="n", pch=16, cex=0.6, 
@@ -119,7 +121,9 @@ nicholsTPR = apply(mlmLabels, 2, function(x){
 nicholsFPR = apply(mlmLabels, 2, function(x){
   1 - sum(x==nicholsLabels & x==FALSE)/sum(nicholsLabels==FALSE)})
 
-png("./pictures/AUC_Nichols.png", 360, 380)
+png("./pictures/nichols_auxo_ROC.png", 380, 380)
+par(mar=c(4.1,4.1,1.1,1.1))
+
 # ROC curve
 plot(nicholsFPR, nicholsTPR,
      xlab="False Positive Rate", ylab="True Positive Rate", 
@@ -152,7 +156,9 @@ mean(do.call(c, sapply(joyceAuxoMin, function(x){
 joyceAuxoMinDf = melt(joyceAuxoMin)
 names(joyceAuxoMinDf) = c("Cond_Conc", "Mutant", "tStat", "Plate")
 
-png("./pictures/dot_Joyce.png", 480, 340)
+png("./pictures/joyce_auxo_dot.png", 480, 320)
+par(mar=c(4.1,4.1,1.1,1.1))
+
 # Dot plot of t-statistics corresponding to Joyce auxotrophs
 plot(tStat~as.numeric(as.factor(Mutant)), joyceAuxoMinDf, 
      xaxt="n", pch=16, cex=0.6, 
@@ -176,8 +182,9 @@ joyceTPR = apply(mlmLabels, 2, function(x){
 joyceFPR = apply(mlmLabels, 2, function(x){
   1 - sum(x==joyceLabels & x==FALSE)/sum(joyceLabels==FALSE)})
 
-# AUC plots
-png("./pictures/AUC_Joyce.png", 360, 380)
+png("./pictures/joyce_auxo_ROC.png", 380, 380)
+par(mar=c(4.1,4.1,1.1,1.1))
+
 # ROC curve
 plot(joyceFPR, joyceTPR, 
      xlab="False Positive Rate", ylab="True Positive Rate", 
