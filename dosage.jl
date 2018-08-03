@@ -114,15 +114,15 @@ for i in 1:6
     # Read in data for each plate
     # Colony opacity
     Y = readtable(string("./processed/processed_KEIO_data/p", i, 
-                  "_krit_dat.csv"), separator = ',', header=true)
+                  "_krit_dat.csv"), separator=',', header=true)
     
     # Conditions
     X = readtable(string("./processed/processed_KEIO_data/p", i, 
-                  "_krit_cond.csv"), separator = ',', header=true)
+                  "_krit_cond.csv"), separator=',', header=true)
     
     # Mutant keys
     Z = readtable(string("./processed/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
-                  separator = '\t', header=true)
+                  separator='\t', header=true)
     
     # Dosage slopes
     XDos = get_XDos(X, :Condition, :Concentration)

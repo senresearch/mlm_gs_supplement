@@ -7,7 +7,8 @@ genetic screening paper.
 
 ---
 
-`compare_times.jl`: Compares the runtimes for MLM and Collins S scores [^fn1]
+- `compare_times.jl`: Compares the runtimes for MLM and Collins S scores 
+[^fn1]
 
 ---
 
