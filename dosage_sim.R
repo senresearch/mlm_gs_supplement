@@ -1,17 +1,17 @@
 library(MESS) # AUC
 library(mutoss) # adaptive Benjamini-Hochberg
 
-# Read in MLM p-values for dosage slopes
+# Read in MLM p-values (dosage-response)
 pvalsDos = lapply(1:6, function(i){
   read.csv(paste("./processed/dos_sim_p", i, "_pvalsDos.csv", sep=""), 
            header=FALSE)
 })
-# Read in MLM p-values 
+# Read in MLM p-values (condition-concentrations)
 pvals = lapply(1:6, function(i){
   read.csv(paste("./processed/dos_sim_p", i, "_pvals.csv", sep=""), 
            header=FALSE)
 })
-# Read in MLM p-values with only conditions encoded
+# Read in MLM p-values (conditions only)
 pvalsCond = lapply(1:6, function(i){
   read.csv(paste("./processed/dos_sim_p", i, "_pvalsCond.csv", sep=""), 
            header=FALSE)
@@ -23,16 +23,16 @@ interactions = lapply(1:6, function(i){
            header=FALSE)
 })
 
-# Convert MLM p-values for dosage slopes to adaptive BH-adjusted p-values
+# Convert MLM p-values (dosage-response) to adaptive BH-adjusted p-values
 adjPvalsDos = lapply(1:6, function(i){
   adaptiveBH(as.matrix(pvalsDos[[i]]), alpha=0.05, silent=TRUE)$adjPValues
 })
-# Convert MLM p-values to adaptive BH-adjusted p-values
+# Convert MLM p-values (condition-concentrations) to adaptive BH-adjusted 
+# p-values
 adjPvals = lapply(1:6, function(i){
   adaptiveBH(as.matrix(pvals[[i]]), alpha=0.05, silent=TRUE)$adjPValues
 })
-# Convert MLM p-values with only conditions encoded to adaptive BH-adjusted 
-# p-values
+# Convert MLM p-values (conditions only) to adaptive BH-adjusted p-values
 adjPvalsCond = lapply(1:6, function(i){
   adaptiveBH(as.matrix(pvalsCond[[i]]), alpha=0.05, silent=TRUE)$adjPValues
 })
@@ -131,7 +131,7 @@ get_fpr_hits = function(adjP, interactions, interStack, FDRs, hits, p, levs) {
 # TPR for each method
 tpr = lapply(1:6, function(i) {
   out = cbind(
-    # Dosage slopes
+    # Dosage-response
     get_tpr(adjPvalsDos[[i]], interactions[[i]], FDRs), 
     # Condition-concentrations
     get_tpr(adjPvals[[i]], interStack[[i]], FDRs), 
@@ -148,7 +148,7 @@ tpr = lapply(1:6, function(i) {
 # FPR for each method
 fpr = lapply(1:6, function(i) {
   out = cbind(
-    # Dosage slopes
+    # Dosage-response
     get_fpr(adjPvalsDos[[i]], interactions[[i]], FDRs), 
     # Condition-concentrations
     get_fpr(adjPvals[[i]], interStack[[i]], FDRs), 
@@ -171,12 +171,17 @@ png("./pictures/dos_sim_p%01d_ROC.png", width=380, height=380)
 par(mar=c(4.1,4.1,1.1,1.1))
 
 AUCs = sapply(1:6, function(i) {
+  # ROC curve for dosage-response
   plot(c(0, fpr[[i]][,1]), c(0, tpr[[i]][,1]), col=myCols[1], lty=myLines[1], 
        xlab="False Positive Rate", ylab="True Positive Rate", 
        xaxs="i", yaxs="i", type="l")
+  # ROC curve for condition-concentrations
   lines(c(0, fpr[[i]][,2]), c(0, tpr[[i]][,2]), col=myCols[2], lty=myLines[2])
+  # ROC curve for conditions only
   lines(c(0, fpr[[i]][,3]), c(0, tpr[[i]][,3]), col=myCols[3], lty=myLines[3])
+  # ROC curve for 1/3 hits
   lines(c(0, fpr[[i]][,4]), c(0, tpr[[i]][,4]), col=myCols[4], lty=myLines[4])
+  # ROC curve for 2/3 hits
   lines(c(0, fpr[[i]][,5]), c(0, tpr[[i]][,5]), col=myCols[5], lty=myLines[5])
   
   # Reference line
@@ -190,3 +195,7 @@ AUCs = sapply(1:6, function(i) {
   return(sapply(1:5, function(j){auc(c(0, fpr[[i]][,j]), c(0, tpr[[i]][,j]))}))
 })
 dev.off()
+
+rownames(AUCs) = c("Dos. Resp.", "Cond.-Conc.", "Conditions", 
+                   "1/3 Hits", "2/3 Hits") 
+colnames(AUCs) = paste("Plate", 1:6)

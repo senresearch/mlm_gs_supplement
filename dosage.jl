@@ -129,7 +129,7 @@ for i in 1:6
     # Put together RawData object for MLM with dosage slopes
     MLMDosData = read_plate(XDos, Y, Z[[:name]]; 
                             ZCVar=:name, ZCType="sum", isYstd=true)
-    # Run matrix linear models
+    # Run matrix linear models (dosage-response)
     srand(i)
     tStatsDos, pvalsDos = mlm_backest_sum_perms(MLMDosData, nPerms; 
     	                                        isXIntercept=false, 

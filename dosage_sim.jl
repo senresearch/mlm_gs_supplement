@@ -186,7 +186,7 @@ for i in 1:6
                                Z[[:name]]; ZCVar=:name, ZCType="sum", 
                                isXDos=true, XConditionVar=:Condition, 
                                XConcentrationVar=:Concentration, isYstd=true)
-    # Run matrix linear models
+    # Run matrix linear models (dosage-response)
     srand(i)
     tStatsDos, pvalsDos = mlm_backest_sum_perms(MLMDosSimData, nPerms; 
     	                                        isXIntercept=false, 
@@ -199,7 +199,7 @@ for i in 1:6
     MLMSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
                             XCVar=:Cond_Conc, ZCVar=:name,
                             XCType="sum", ZCType="sum", isYstd=true)
-    # Run matrix linear models
+    # Run matrix linear models (condition-concentrations)
     srand(i)
     tStats, pvals = mlm_backest_sum_perms(MLMSimData, nPerms)
     # Write to CSV
@@ -210,7 +210,7 @@ for i in 1:6
     MLMCondSimData = read_plate(X[[:Condition]], YSim, Z[[:name]]; 
                                 XCVar=:Condition, ZCVar=:name,
                                 XCType="sum", ZCType="sum", isYstd=true)
-    # Run matrix linear models
+    # Run matrix linear models (conditions only)
     srand(i)
     tStatsCond, pvalsCond = mlm_backest_sum_perms(MLMCondSimData, nPerms)
     # Write to CSV

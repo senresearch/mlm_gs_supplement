@@ -94,3 +94,6 @@ AUCs = sapply(1:6, function(i) {
            auc(c(0, SFPR[[i]]), c(0, STPR[[i]]), type="spline")))
 })
 dev.off()
+
+rownames(AUCs) = c("MLM", "S scores")
+colnames(AUCs) = paste("Plate", 1:6)

@@ -1,6 +1,6 @@
 library(mutoss) # adaptive Benjamini-Hochberg
 
-# Read in MLM p-values for dosage slopes
+# Read in MLM p-values (dosage-response)
 pvalsDos = lapply(1:6, function(i){
   read.csv(paste("./processed/p", i, "_pvalsDos.csv", sep=""), header=FALSE)
 })
@@ -13,7 +13,7 @@ SPvals = lapply(1:6, function(i){
   read.csv(paste("./processed/p", i, "_SPvals.csv", sep=""), header=FALSE)
 })
 
-# Convert MLM p-values for dosage slopes to adaptive BH-adjusted p-values
+# Convert MLM p-values (dosage-response) to adaptive BH-adjusted p-values
 adjPvalsDos = lapply(1:6, function(i){
   adaptiveBH(as.matrix(pvalsDos[[i]]), alpha=0.05, silent=TRUE)$adjPValues
 })
@@ -43,7 +43,7 @@ get_prop = function(adjP, FDRs) {
 
 # Calculate proportion of hits for each method and plate
 propHits = lapply(1:6, function(i) {
-  cbind(get_prop(adjPvalsDos[[i]], FDRs), # MLM with dosage slopes
+  cbind(get_prop(adjPvalsDos[[i]], FDRs), # MLM (dosage-response)
         get_prop(adjPvals[[i]], FDRs), # MLM
         get_prop(adjSPvals[[i]], FDRs)) # S scores
 })
@@ -57,7 +57,7 @@ png("./pictures/dos_p%01d_prop_hits.png", width=380, height=380)
 par(mar=c(4.1,4.1,1.1,1.1))
 
 invisible(sapply(1:6, function(i) {
-  # Proportion of hits for MLM with dosage slopes
+  # Proportion of hits for MLM (dosage-response)
   plot(FDRs, propHits[[i]][,1], type="l", col=myCols[3], lty=myLines[3], 
        xlab="Adjusted p-value Cutoffs", 
        ylab="Prop. of Significant Interactions")
