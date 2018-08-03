@@ -15,8 +15,9 @@ genetic screening paper.
 - `dosage.jl`: Run MLM (dosage-response and condition-concentrations) and 
 Collins S scores [^fn1] on Nichols [^fn3] data
 
-- `auxotroph.R`: Reproduce plots for auxotroph checks against Nichols [^fn3] 
-and Joyce [^fn2]
+- `auxotroph.R`: Reproduce plots to check for auxotrophs against the lists 
+provided in Supplemental Table 4 in Nichols [^fn3] and Supplemental Table 1 
+in Joyce [^fn2]
 
 - `dosage.R`: Reproduce plots of proportion of hits detected by dosage 
 response approach

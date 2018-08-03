@@ -72,8 +72,9 @@ mlmLabels = sapply(mlmAuxo, function(y){
 
 ###############################################################################
 
-# Read in Nichols auxotrophs 
-nicholsAuxo = read.csv("./processed/mmc4.csv", header=T, skip=1)
+# Read in Nichols auxotrophs (Supplemental Table 4)
+nicholsAuxo = read.csv("./processed/NIHMS261392-supplement-04.csv", 
+                       header=TRUE, skip=1)
 # Pull out names of Nichols auxotrophs
 nicholsAuxoNames = na.omit(
   sapply(strsplit(as.character(nicholsAuxo$Auxotrophs), "-"), 
@@ -137,11 +138,14 @@ auc(nicholsFPR, nicholsTPR, type="spline")
 
 ###############################################################################
 
-# Read in Joyce auxotrophs 
-joyceAuxo = intersect(read.table("./processed/Joyce2006.tab1.txt")$V1, 
-                      do.call(c, Znames))
+# Read in Joyce auxotrophs (Supplemental Table 1)
+joyceAuxo = read.csv("./processed/SupplementalDataResubmission_Tab1.csv", 
+                     header=2, skip=1)
+# Pull out names of Joyce auxotrophs
+joyceAuxoNames = intersect(as.character(
+  joyceAuxo$Locus.Name[joyceAuxo$Locus.Name!=""]), do.call(c, Znames))
 # Get the indices of the mutants corresponding to the Joyce auxotrophs
-joyceAuxoIdx = sapply(Znames, function(x){na.omit(match(joyceAuxo, x))})
+joyceAuxoIdx = sapply(Znames, function(x){na.omit(match(joyceAuxoNames, x))})
 # Pull out the t-statistics of the interactions for minimal media conditions 
 # and the Joyce auxotrophs
 joyceAuxoMin = sapply(1:6, function(i){
@@ -174,7 +178,7 @@ dev.off()
 
 # Get the labels for whether or not each mutant is a Joyce auxotroph
 joyceLabels = do.call(c, sapply(1:6, function(i){
-  sapply(Znames[[i]], function(x){x %in% joyceAuxo})}))
+  sapply(Znames[[i]], function(x){x %in% joyceAuxoNames})}))
 
 # TPR and FPR when taking the Joyce auxotrophs as the "truth"
 joyceTPR = apply(mlmLabels, 2, function(x){
