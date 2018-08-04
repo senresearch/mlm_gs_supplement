@@ -51,7 +51,7 @@ for i in 1:6
         mlmTimes[i,j] = @elapsed mlm_backest_sum(MLMData)
         
         # Get times from running S scores
-        STimes[i,j] = @elapsed S_score(MLMData)
+        STimes[i,j] = @elapsed S_score(SData)
         
         # Get times from running matrix linear model permutations
         srand(i)
@@ -59,7 +59,7 @@ for i in 1:6
         
         # Get times from running S score permutations
         srand(i)
-        SPermTimes[i,j] = @elapsed S_score_perms(MLMData, nPerms)
+        SPermTimes[i,j] = @elapsed S_score_perms(SData, nPerms)
         
     end
 end
