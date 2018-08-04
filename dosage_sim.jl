@@ -181,7 +181,7 @@ for i in 1:6
     srand(10+i)
     interactions, X, YSim = sim_dos_data(p, levs, reps, Z[[:name]], :name)
     
-    # Put together RawData object for MLM with dosage slopes 
+    # Put together RawData object for matrix linear models (dosage-response)
     MLMDosSimData = read_plate(X[[:Condition, :Concentration]], YSim, 
                                Z[[:name]]; ZCVar=:name, ZCType="sum", 
                                isXDos=true, XConditionVar=:Condition, 
@@ -194,28 +194,28 @@ for i in 1:6
     # Write to CSV
     writecsv(string("./processed/dos_sim_p", i, "_tStatsDos.csv"), tStatsDos)
     writecsv(string("./processed/dos_sim_p", i, "_pvalsDos.csv"), pvalsDos)
-    
-    # Put together RawData object for MLM
-    MLMSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
-                            XCVar=:Cond_Conc, ZCVar=:name,
-                            XCType="sum", ZCType="sum", isYstd=true)
-    # Run matrix linear models (condition-concentrations)
+	
+    # Put together RawData object for S scores (condition-concentrations)
+    SSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
+                          XCVar=:Cond_Conc, ZCVar=:name,
+                          XCType="noint", ZCType="noint", isYstd=true)
+    # Run S scores (condition-concentrations)
     srand(i)
-    tStats, pvals = mlm_backest_sum_perms(MLMSimData, nPerms)
+    S, SPvals = S_score_perms(SSimData, nPerms)
     # Write to CSV
-    writecsv(string("./processed/dos_sim_p", i, "_tStats.csv"), tStats)
-    writecsv(string("./processed/dos_sim_p", i, "_pvals.csv"), pvals)
+    writecsv(string("./processed/dos_sim_p", i, "_S.csv"), S)
+    writecsv(string("./processed/dos_sim_p", i, "_SPvals.csv"), SPvals)
     
-    # Put together RawData object for MLM with only conditions encoded in `X`
-    MLMCondSimData = read_plate(X[[:Condition]], YSim, Z[[:name]]; 
-                                XCVar=:Condition, ZCVar=:name,
-                                XCType="sum", ZCType="sum", isYstd=true)
-    # Run matrix linear models (conditions only)
+    # Put together RawData object for S scores (conditions only)
+    SCondSimData = read_plate(X[[:Condition]], YSim, Z[[:name]]; 
+                              XCVar=:Condition, ZCVar=:name,
+                              XCType="noint", ZCType="noint", isYstd=true)
+    # Run S scores (conditions only)
     srand(i)
-    tStatsCond, pvalsCond = mlm_backest_sum_perms(MLMCondSimData, nPerms)
+    SCond, SPvalsCond = S_score_perms(SCondSimData, nPerms)
     # Write to CSV
-    writecsv(string("./processed/dos_sim_p", i, "_tStatsCond.csv"), tStatsCond)
-    writecsv(string("./processed/dos_sim_p", i, "_pvalsCond.csv"), pvalsCond)
+    writecsv(string("./processed/dos_sim_p", i, "_SCond.csv"), SCond)
+    writecsv(string("./processed/dos_sim_p", i, "_SPvalsCond.csv"), SPvalsCond)
     
     # Write simulated interactions to CSV 
     writecsv(string("./processed/dos_sim_p", i, "_interactions.csv"), 

@@ -6,14 +6,14 @@ pvalsDos = lapply(1:6, function(i){
   read.csv(paste("./processed/dos_sim_p", i, "_pvalsDos.csv", sep=""), 
            header=FALSE)
 })
-# Read in MLM p-values (condition-concentrations)
-pvals = lapply(1:6, function(i){
-  read.csv(paste("./processed/dos_sim_p", i, "_pvals.csv", sep=""), 
+# Read in S score p-values (condition-concentrations)
+SPvals = lapply(1:6, function(i){
+  read.csv(paste("./processed/dos_sim_p", i, "_SPvals.csv", sep=""), 
            header=FALSE)
 })
-# Read in MLM p-values (conditions only)
-pvalsCond = lapply(1:6, function(i){
-  read.csv(paste("./processed/dos_sim_p", i, "_pvalsCond.csv", sep=""), 
+# Read in S score p-values (conditions only)
+SPvalsCond = lapply(1:6, function(i){
+  read.csv(paste("./processed/dos_sim_p", i, "_SPvalsCond.csv", sep=""), 
            header=FALSE)
 })
 
@@ -27,14 +27,14 @@ interactions = lapply(1:6, function(i){
 adjPvalsDos = lapply(1:6, function(i){
   adaptiveBH(as.matrix(pvalsDos[[i]]), alpha=0.05, silent=TRUE)$adjPValues
 })
-# Convert MLM p-values (condition-concentrations) to adaptive BH-adjusted 
+# Convert S score p-values (condition-concentrations) to adaptive BH-adjusted 
 # p-values
-adjPvals = lapply(1:6, function(i){
-  adaptiveBH(as.matrix(pvals[[i]]), alpha=0.05, silent=TRUE)$adjPValues
+adjSPvals = lapply(1:6, function(i){
+  adaptiveBH(as.matrix(SPvals[[i]]), alpha=0.05, silent=TRUE)$adjPValues
 })
-# Convert MLM p-values (conditions only) to adaptive BH-adjusted p-values
-adjPvalsCond = lapply(1:6, function(i){
-  adaptiveBH(as.matrix(pvalsCond[[i]]), alpha=0.05, silent=TRUE)$adjPValues
+# Convert S score p-values (conditions only) to adaptive BH-adjusted p-values
+adjSPvalsCond = lapply(1:6, function(i){
+  adaptiveBH(as.matrix(SPvalsCond[[i]]), alpha=0.05, silent=TRUE)$adjPValues
 })
 
 
@@ -131,14 +131,14 @@ get_fpr_hits = function(adjP, interactions, interStack, FDRs, hits, p, levs) {
 # TPR for each method
 tpr = lapply(1:6, function(i) {
   out = cbind(
-    # Dosage-response
+    # Dosage-response (MLM)
     get_tpr(adjPvalsDos[[i]], interactions[[i]], FDRs), 
     # Condition-concentrations
-    get_tpr(adjPvals[[i]], interStack[[i]], FDRs), 
+    get_tpr(adjSPvals[[i]], interStack[[i]], FDRs), 
     # Conditions only
-    get_tpr(adjPvalsCond[[i]], interactions[[i]], FDRs), 
+    get_tpr(adjSPvalsCond[[i]], interactions[[i]], FDRs), 
     # Condition-concentration hits
-    get_tpr_hits(adjPvals[[i]], interactions[[i]], interStack[[i]], 
+    get_tpr_hits(adjSPvals[[i]], interactions[[i]], interStack[[i]], 
                  FDRs, hits, p, levs)) 
   
   colnames(out) = c("DosResp", "CondConc", "Cond", "Hits13", "Hits23")
@@ -148,14 +148,14 @@ tpr = lapply(1:6, function(i) {
 # FPR for each method
 fpr = lapply(1:6, function(i) {
   out = cbind(
-    # Dosage-response
+    # Dosage-response (MLM)
     get_fpr(adjPvalsDos[[i]], interactions[[i]], FDRs), 
     # Condition-concentrations
-    get_fpr(adjPvals[[i]], interStack[[i]], FDRs), 
+    get_fpr(adjSPvals[[i]], interStack[[i]], FDRs), 
     # Conditions only
-    get_fpr(adjPvalsCond[[i]], interactions[[i]], FDRs), 
+    get_fpr(adjSPvalsCond[[i]], interactions[[i]], FDRs), 
     # Condition-concentration hits
-    get_fpr_hits(adjPvals[[i]], interactions[[i]], interStack[[i]], 
+    get_fpr_hits(adjSPvals[[i]], interactions[[i]], interStack[[i]], 
                  FDRs, hits, p, levs)) 
 
   colnames(out) = c("DosResp", "CondConc", "Cond", "Hits13", "Hits23")
@@ -171,7 +171,7 @@ png("./pictures/dos_sim_p%01d_ROC.png", width=380, height=380)
 par(mar=c(4.1,4.1,1.1,1.1))
 
 AUCs = sapply(1:6, function(i) {
-  # ROC curve for dosage-response
+  # ROC curve for dosage-response (MLM)
   plot(c(0, fpr[[i]][,1]), c(0, tpr[[i]][,1]), col=myCols[1], lty=myLines[1], 
        xlab="False Positive Rate", ylab="True Positive Rate", 
        xaxs="i", yaxs="i", type="l")
@@ -187,8 +187,8 @@ AUCs = sapply(1:6, function(i) {
   # Reference line
   abline(0, 1, col="grey")
   # Legend for different methods
-  legend(0.4, 0.375, 
-         c("Dos. Resp.", "Cond.-Conc.", "Conditions", "1/3 Hits", "2/3 Hits"), 
+  legend(0.4, 0.375, c("Dos. Resp. (MLM)", "Cond.-Conc.", "Conditions", 
+                       "1/3 Hits", "2/3 Hits"), 
          col=myCols, lty=myLines, bty="n")
   
   # Return AUCs
@@ -196,6 +196,6 @@ AUCs = sapply(1:6, function(i) {
 })
 dev.off()
 
-rownames(AUCs) = c("Dos. Resp.", "Cond.-Conc.", "Conditions", 
+rownames(AUCs) = c("Dos. Resp. (MLM)", "Cond.-Conc.", "Conditions", 
                    "1/3 Hits", "2/3 Hits") 
 colnames(AUCs) = paste("Plate", 1:6)

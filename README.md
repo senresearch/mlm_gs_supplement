@@ -3,39 +3,42 @@ genetic screening paper.
 
 ---
 
-- `preprocess.R`: Preprocess Nichols [^fn3] data
+- `preprocess.R`: Preprocess Nichols's [^fn3] data
 
 ---
 
-- `compare_times.jl`: Compares the runtimes for MLM and Collins S scores 
-[^fn1]
+- `compare_times.jl`: Compares the runtimes for matrix linear models and 
+Collins's S scores [^fn1]
 
 ---
 
-- `dosage.jl`: Run MLM (dosage-response and condition-concentrations) and 
-Collins S scores [^fn1] on Nichols [^fn3] data
+- `dosage.jl`: Run matrix linear models 
+(dosage-response and condition-concentrations) and Collins's S scores 
+(condition-concentrations) [^fn1] on Nichols's [^fn3] data
 
 - `auxotroph.R`: Reproduce plots to check for auxotrophs against the lists 
 provided in Supplemental Table 4 in Nichols [^fn3] and Supplemental Table 1 
 in Joyce [^fn2]
 
 - `dosage.R`: Reproduce plots of proportion of hits detected by dosage 
-response approach
+response approach compared to matrix linear models and Collins's S scores
 
 ---
 
-- `sim.jl`: Run MLM and Collins S scores [^fn1] on simulated data
-
-- `sim.R`: Reproduce ROC plots for comparing MLM and Collins S scores [^fn1]
-
----
-
-- `dosage_sim.jl`: Run MLM 
-(dosage-response, condition-concentrations, and conditions only) on 
+- `sim.jl`: Run matrix linear models and Collins's S scores [^fn1] on 
 simulated data
 
-- `dosage_sim.R`: Reproduce ROC plots for comparing MLM encoding approaches
-(dosage-response, condition-concentrations, and conditions only)
+- `sim.R`: Reproduce ROC plots for comparing matrix linear models and 
+Collins's S scores [^fn1]
+
+---
+
+- `dosage_sim.jl`: Run matrix linear models (dosage-response) and Collins's S 
+scores (condition-concentrations and conditions only) on simulated data
+
+- `dosage_sim.R`: Reproduce ROC plots for comparing matrix linear models 
+(dosage-response) and Collins's S scores 
+(condition-concentrations and conditions only)
 
 
 [^fn1]: Collins, S. R., Schuldiner, M., Krogan, N. J., and Weissman, J. S. 
