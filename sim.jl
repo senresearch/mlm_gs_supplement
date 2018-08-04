@@ -193,7 +193,7 @@ for i in 1:6
 	interactions, YSim = sim_data(X[[:Cond_Conc]], Z[[:name]], 
                                   :Cond_Conc, :name)
     
-    # Put together RawData object for MLM
+    # Put together RawData object for matrix linear models
     MLMSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
                             XCVar=:Cond_Conc, ZCVar=:name,
                             XCType="sum", ZCType="sum", isYstd=true)

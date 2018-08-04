@@ -34,7 +34,7 @@ for i in 1:6
     Z = readtable(string("./processed/raw_KEIO_data/KEIO", i, 
                          "_KEY.csv"), separator='\t', header=true) 
     
-    # Put together RawData object for MLM 
+    # Put together RawData object for matrix linear models 
     MLMData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
     	        	     XCVar=:Cond_Conc, ZCVar=:name,
     	        	     isYstd=true, XCType="sum", ZCType="sum")

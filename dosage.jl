@@ -126,7 +126,7 @@ for i in 1:6
     
     # Dosage slopes
     XDos = get_XDos(X, :Condition, :Concentration)
-    # Put together RawData object for MLM with dosage slopes
+    # Put together RawData object for matrix linear models (dosage-response)
     MLMDosData = read_plate(XDos, Y, Z[[:name]]; 
                             ZCVar=:name, ZCType="sum", isYstd=true)
     # Run matrix linear models (dosage-response)
@@ -138,7 +138,7 @@ for i in 1:6
     writecsv(string("./processed/p", i, "_tStatsDos.csv"), tStatsDos)
     writecsv(string("./processed/p", i, "_pvalsDos.csv"), pvalsDos)
     
-    # Put together RawData object for MLM
+    # Put together RawData object for matrix linear models 
     MLMData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
                             XCVar=:Cond_Conc, ZCVar=:name,
                             XCType="sum", ZCType="sum", isYstd=true)
