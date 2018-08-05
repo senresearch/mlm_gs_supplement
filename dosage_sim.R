@@ -187,7 +187,7 @@ AUCs = sapply(1:6, function(i) {
   # Reference line
   abline(0, 1, col="grey")
   # Legend for different methods
-  legend(0.4, 0.375, c("Dos. Resp. (MLM)", "Cond.-Conc.", "Conditions", 
+  legend(0.4, 0.375, c("MLM Dos. Resp.", "Cond.-Conc.", "Conditions", 
                        "1/3 Hits", "2/3 Hits"), 
          col=myCols, lty=myLines, bty="n")
   
@@ -196,6 +196,6 @@ AUCs = sapply(1:6, function(i) {
 })
 dev.off()
 
-rownames(AUCs) = c("Dos. Resp. (MLM)", "Cond.-Conc.", "Conditions", 
+rownames(AUCs) = c("MLM Dos. Resp.", "Cond.-Conc.", "Conditions", 
                    "1/3 Hits", "2/3 Hits") 
 colnames(AUCs) = paste("Plate", 1:6)
