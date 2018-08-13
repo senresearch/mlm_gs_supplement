@@ -174,7 +174,7 @@ for i in 1:6
     
     # Read in data for each plate
     # Mutant keys
-    Z = readtable(string("./processed/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
+    Z = readtable(string("./data/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
                   separator='\t', header=true)
     
     # Simulate interactions, conditions and concentrations, and response matrix

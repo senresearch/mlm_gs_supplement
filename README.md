@@ -3,7 +3,8 @@ genetic screening paper.
 
 ---
 
-- `preprocess.R`: Preprocess Nichols's [^fn3] data
+- `preprocess.R`: Preprocess Nichols's [^fn3] data; requires data contained in 
+`data/raw_KEIO_data`
 
 ---
 

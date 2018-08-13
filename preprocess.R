@@ -2,12 +2,12 @@ library(data.table) # quickly read in tables
 
 # Read in keys (with mutant and spatial information) for each of the 6 plates. 
 KEIOKeys = lapply(1:6, function(i){
-  read.csv(paste0("./processed/raw_KEIO_data/KEIO", i, "_KEY.csv"), sep="\t")
+  read.csv(paste0("./data/raw_KEIO_data/KEIO", i, "_KEY.csv"), sep="\t")
 })
 
 # Read in the Kritikos condition information. 
 kritCond = lapply(1:6, function(i){
-  read.csv(paste0("./processed/raw_KEIO_data/krit_condition_files/p", i, 
+  read.csv(paste0("./data/raw_KEIO_data/krit_condition_files/p", i, 
                   "_4120krit.csv"), sep="\t")
 })
 
@@ -33,7 +33,7 @@ read_dat = function(datFile, mutantKey, directory, ...) {
 # Get the Y response matrix of colony opacities for the Kritikos conditions
 kritDat = lapply(1:6, function(i){
   t(sapply(kritCond[[i]]$KRIT.FILE, read_dat, KEIOKeys[[i]], 
-           "./processed/raw_KEIO_data/krit_dat/"))
+           "./data/raw_KEIO_data/krit_dat/"))
 })
 
 # Plate 5: Drop rows with conditions "novobiocin" and concentration "null"

@@ -121,7 +121,7 @@ for i in 1:6
                   "_krit_cond.csv"), separator=',', header=true)
     
     # Mutant keys
-    Z = readtable(string("./processed/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
+    Z = readtable(string("./data/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
                   separator='\t', header=true)
     
     # Dosage slopes

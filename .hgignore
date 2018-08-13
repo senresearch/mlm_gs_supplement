@@ -2,3 +2,4 @@ syntax: glob
 *.Rhistory
 processed/
 pictures/
+data/

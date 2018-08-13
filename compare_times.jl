@@ -31,7 +31,7 @@ for i in 1:6
                          "_krit_cond.csv"), separator=',', header=true) 
     
     # Mutant keys
-    Z = readtable(string("./processed/raw_KEIO_data/KEIO", i, 
+    Z = readtable(string("./data/raw_KEIO_data/KEIO", i, 
                          "_KEY.csv"), separator='\t', header=true) 
     
     # Put together RawData object for matrix linear models 
@@ -43,8 +43,7 @@ for i in 1:6
     SData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
     	        	   XCVar=:Cond_Conc, ZCVar=:name,
     	        	   isYstd=true, XCType="noint", ZCType="noint")
-
-    
+    print(string("Plate ", i))
     for j in 1:(reps+1) 
         
         # Get times from running matrix linear models
