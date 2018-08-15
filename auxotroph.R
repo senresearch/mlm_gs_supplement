@@ -73,7 +73,7 @@ mlmLabels = sapply(mlmAuxo, function(y){
 ###############################################################################
 
 # Read in Nichols auxotrophs (Supplemental Table 4)
-nicholsAuxo = read.csv("./processed/NIHMS261392-supplement-04.csv", 
+nicholsAuxo = read.csv("./data/NIHMS261392-supplement-04.csv", 
                        header=TRUE, skip=1)
 # Pull out names of Nichols auxotrophs
 nicholsAuxoNames = na.omit(
@@ -139,7 +139,7 @@ auc(nicholsFPR, nicholsTPR, type="spline")
 ###############################################################################
 
 # Read in Joyce auxotrophs (Supplemental Table 1)
-joyceAuxo = read.csv("./processed/SupplementalDataResubmission_Tab1.csv", 
+joyceAuxo = read.csv("./data/SupplementalDataResubmission_Tab1.csv", 
                      header=2, skip=1)
 # Pull out names of Joyce auxotrophs
 joyceAuxoNames = intersect(as.character(
