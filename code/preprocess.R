@@ -2,12 +2,12 @@ library(data.table) # quickly read in tables
 
 # Read in keys (with mutant and spatial information) for each of the 6 plates. 
 KEIOKeys = lapply(1:6, function(i){
-  read.csv(paste0("./data/raw_KEIO_data/KEIO", i, "_KEY.csv"), sep="\t")
+  read.csv(paste0("../data/raw_KEIO_data/KEIO", i, "_KEY.csv"), sep="\t")
 })
 
 # Read in the Kritikos condition information. 
 kritCond = lapply(1:6, function(i){
-  read.csv(paste0("./data/raw_KEIO_data/krit_condition_files/p", i, 
+  read.csv(paste0("../data/raw_KEIO_data/krit_condition_files/p", i, 
                   "_4120krit.csv"), sep="\t")
 })
 
@@ -33,7 +33,7 @@ read_dat = function(datFile, mutantKey, directory, ...) {
 # Get the Y response matrix of colony opacities for the Kritikos conditions
 kritDat = lapply(1:6, function(i){
   t(sapply(kritCond[[i]]$KRIT.FILE, read_dat, KEIOKeys[[i]], 
-           "./data/raw_KEIO_data/krit_dat/"))
+           "../data/raw_KEIO_data/krit_dat/"))
 })
 
 # Plate 5: Drop rows with conditions "novobiocin" and concentration "null"
@@ -98,21 +98,21 @@ sapply(kritMutNames, function(x){length(unique(x))})
 for (i in 1:6) {
   # X covariate matrix coded with condition-concentrations
   write.csv(kritCond[[i]], 
-            file=paste0("./processed/processed_KEIO_data/p", i, 
+            file=paste0("../processed/processed_KEIO_data/p", i, 
                         "_krit_cond.csv"), row.names=FALSE)
   # Y response matrix of colony opacities
   write.csv(kritDat[[i]], 
-            file=paste0("./processed/processed_KEIO_data/p", i, 
+            file=paste0("../processed/processed_KEIO_data/p", i, 
                         "_krit_dat.csv"), row.names=FALSE)
   
   # Condition-concentration names
   write.table(kritCond_conc_names[[i]], 
-              file=paste0("./processed/processed_KEIO_data/p", i, 
+              file=paste0("../processed/processed_KEIO_data/p", i, 
                           "_krit_cond_conc_names.csv"), 
               sep=",", row.names=FALSE, col.names=FALSE)
   # Mutation names
   write.table(kritMutNames[[i]], 
-              file=paste0("./processed/processed_KEIO_data/p", i, 
+              file=paste0("../processed/processed_KEIO_data/p", i, 
                           "_krit_mut_names.csv"), 
               sep=",", row.names=FALSE, col.names=FALSE)
 }

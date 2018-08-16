@@ -2,15 +2,15 @@ library(mutoss) # adaptive Benjamini-Hochberg
 
 # Read in MLM p-values (dosage-response)
 pvalsDos = lapply(1:6, function(i){
-  read.csv(paste("./processed/p", i, "_pvalsDos.csv", sep=""), header=FALSE)
+  read.csv(paste("../processed/p", i, "_pvalsDos.csv", sep=""), header=FALSE)
 })
 # Read in MLM p-values 
 pvals = lapply(1:6, function(i){
-  read.csv(paste("./processed/p", i, "_pvals.csv", sep=""), header=FALSE)
+  read.csv(paste("../processed/p", i, "_pvals.csv", sep=""), header=FALSE)
 })
 # Read in S score p-values 
 SPvals = lapply(1:6, function(i){
-  read.csv(paste("./processed/p", i, "_SPvals.csv", sep=""), header=FALSE)
+  read.csv(paste("../processed/p", i, "_SPvals.csv", sep=""), header=FALSE)
 })
 
 # Convert MLM p-values (dosage-response) to adaptive BH-adjusted p-values
@@ -53,14 +53,15 @@ propHits = lapply(1:6, function(i) {
 myCols = c("black", "dodgerblue3", "firebrick3")
 myLines = c("solid", "dashed", "solid")
 
-png("./pictures/dos_p%01d_prop_hits.png", width=380, height=380)
-par(mar=c(4.1,4.1,1.1,1.1))
+png("../pictures/dos_p%01d_prop_hits.png", width=380, height=380)
+par(mar=c(4.1,4.1,2.1,2.1))
 
 invisible(sapply(1:6, function(i) {
   # Proportion of hits for MLM (dosage-response)
   plot(FDRs, propHits[[i]][,1], type="l", col=myCols[3], lty=myLines[3], 
        xlab="Adjusted p-value Cutoffs", 
-       ylab="Prop. of Significant Interactions")
+       ylab="Prop. of Significant Interactions", 
+       main=paste("Plate", i))
   # Proportion of hits for MLM
   lines(FDRs, propHits[[i]][,2], col=myCols[1], lty=myLines[1])
   # Proportion of hits for S scores

@@ -3,16 +3,16 @@ library(mutoss) # adaptive Benjamini-Hochberg
 
 # Read in MLM p-values 
 pvals = lapply(1:6, function(i){
-  read.csv(paste("./processed/sim_p", i, "_pvals.csv", sep=""), header=FALSE)
+  read.csv(paste("../processed/sim_p", i, "_pvals.csv", sep=""), header=FALSE)
 })
 # Read in S score p-values 
 SPvals = lapply(1:6, function(i){
-  read.csv(paste("./processed/sim_p", i, "_SPvals.csv", sep=""), header=FALSE)
+  read.csv(paste("../processed/sim_p", i, "_SPvals.csv", sep=""), header=FALSE)
 })
 
 # Read in interactions
 interactions = lapply(1:6, function(i){
-  read.csv(paste("./processed/sim_p", i, "_interactions.csv", sep=""), 
+  read.csv(paste("../processed/sim_p", i, "_interactions.csv", sep=""), 
            header=FALSE)
 })
 
@@ -71,14 +71,14 @@ SFPR = lapply(1:6, function(i){
 })
 
 
-png("./pictures/sim_p%01d_ROC.png", 380, 380)
-par(mar=c(4.1,4.1,1.1,1.1))
+png("../pictures/sim_p%01d_ROC.png", 380, 380)
+par(mar=c(4.1,4.1,2.1,2.1))
 
 AUCs = sapply(1:6, function(i) {
   # ROC curve for MLM
   plot(c(0, mlmFPR[[i]]), c(0, mlmTPR[[i]]), 
        xlab="False Positive Rate", ylab="True Positive Rate", 
-       xaxs="i", yaxs="i", type="l")
+       main=paste("Plate", i), xaxs="i", yaxs="i", type="l")
   # ROC curve for S scores
   lines(c(0, SFPR[[i]]), c(0, STPR[[i]]), 
         type="l", col="dodgerblue3", lty="dashed")

@@ -1,5 +1,5 @@
 # Matrix linear models for genetic screening data
-@everywhere include("../mlm_packages/GeneticScreen/src/GeneticScreen.jl")
+@everywhere include("../../mlm_packages/GeneticScreen/src/GeneticScreen.jl")
 @everywhere using GeneticScreen
 
 # DataFrames
@@ -174,7 +174,7 @@ for i in 1:6
     
     # Read in data for each plate
     # Mutant keys
-    Z = readtable(string("./data/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
+    Z = readtable(string("../data/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
                   separator='\t', header=true)
     
     # Simulate interactions, conditions and concentrations, and response matrix
@@ -192,8 +192,8 @@ for i in 1:6
     	                                        isXIntercept=false, 
     	                                        isXSum=false)
     # Write to CSV
-    writecsv(string("./processed/dos_sim_p", i, "_tStatsDos.csv"), tStatsDos)
-    writecsv(string("./processed/dos_sim_p", i, "_pvalsDos.csv"), pvalsDos)
+    writecsv(string("../processed/dos_sim_p", i, "_tStatsDos.csv"), tStatsDos)
+    writecsv(string("../processed/dos_sim_p", i, "_pvalsDos.csv"), pvalsDos)
 	
     # Put together RawData object for S scores (condition-concentrations)
     SSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
@@ -203,8 +203,8 @@ for i in 1:6
     srand(i)
     S, SPvals = S_score_perms(SSimData, nPerms)
     # Write to CSV
-    writecsv(string("./processed/dos_sim_p", i, "_S.csv"), S)
-    writecsv(string("./processed/dos_sim_p", i, "_SPvals.csv"), SPvals)
+    writecsv(string("../processed/dos_sim_p", i, "_S.csv"), S)
+    writecsv(string("../processed/dos_sim_p", i, "_SPvals.csv"), SPvals)
     
     # Put together RawData object for S scores (conditions only)
     SCondSimData = read_plate(X[[:Condition]], YSim, Z[[:name]]; 
@@ -214,11 +214,11 @@ for i in 1:6
     srand(i)
     SCond, SPvalsCond = S_score_perms(SCondSimData, nPerms)
     # Write to CSV
-    writecsv(string("./processed/dos_sim_p", i, "_SCond.csv"), SCond)
-    writecsv(string("./processed/dos_sim_p", i, "_SPvalsCond.csv"), SPvalsCond)
+    writecsv(string("../processed/dos_sim_p", i, "_SCond.csv"), SCond)
+    writecsv(string("../processed/dos_sim_p", i, "_SPvalsCond.csv"), SPvalsCond)
     
     # Write simulated interactions to CSV 
-    writecsv(string("./processed/dos_sim_p", i, "_interactions.csv"), 
+    writecsv(string("../processed/dos_sim_p", i, "_interactions.csv"), 
              interactions)
     
 end

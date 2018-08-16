@@ -1,5 +1,5 @@
 # Matrix linear models for genetic screening data
-@everywhere include("../mlm_packages/GeneticScreen/src/GeneticScreen.jl")
+@everywhere include("../../mlm_packages/GeneticScreen/src/GeneticScreen.jl")
 @everywhere using GeneticScreen
 
 # DataFrames
@@ -23,15 +23,15 @@ for i in 1:6
 
     # Read in data for each plate
     # Colony opacity
-    Y = readtable(string("./processed/processed_KEIO_data/p", i, 
+    Y = readtable(string("../processed/processed_KEIO_data/p", i, 
                          "_krit_dat.csv"), separator=',', header=true) 
     
     # Conditions
-    X = readtable(string("./processed/processed_KEIO_data/p", i, 
+    X = readtable(string("../processed/processed_KEIO_data/p", i, 
                          "_krit_cond.csv"), separator=',', header=true) 
     
     # Mutant keys
-    Z = readtable(string("./data/raw_KEIO_data/KEIO", i, 
+    Z = readtable(string("../data/raw_KEIO_data/KEIO", i, 
                          "_KEY.csv"), separator='\t', header=true) 
     
     # Put together RawData object for matrix linear models 
@@ -72,7 +72,7 @@ mlmTimes = vcat(mlmTimes, sum(mlmTimes, 1))
 # Print mean
 println(mean(mlmTimes, 2))
 # Write times to CSV
-writecsv("./processed/mlm_times.csv",  
+writecsv("../processed/mlm_times.csv",  
          vcat(["plate" "mean" transpose(collect(1:reps))], 
               hcat(["1", "2", "3", "4", "5", "6", "Total"], 
                    mean(mlmTimes, 2), mlmTimes)))
@@ -85,7 +85,7 @@ STimes = vcat(STimes, sum(STimes, 1))
 # Print mean
 println(mean(STimes, 2))
 # Write times to CSV
-writecsv("./processed/S_times.csv",  
+writecsv("../processed/S_times.csv",  
          vcat(["plate" "mean" transpose(collect(1:reps))], 
               hcat(["1", "2", "3", "4", "5", "6", "Total"], 
                    mean(STimes, 2), STimes)))
@@ -98,7 +98,7 @@ mlmPermTimes = vcat(mlmPermTimes, sum(mlmPermTimes, 1))
 # Print mean
 println(mean(mlmPermTimes, 2))
 # Write times to CSV
-writecsv("./processed/mlm_perm_times.csv",  
+writecsv("../processed/mlm_perm_times.csv",  
          vcat(["plate" "mean" transpose(collect(1:reps))], 
               hcat(["1", "2", "3", "4", "5", "6", "Total"], 
                    mean(mlmPermTimes, 2), mlmPermTimes)))
@@ -111,7 +111,7 @@ SPermTimes = vcat(SPermTimes, sum(SPermTimes, 1))
 # Print mean
 println(mean(SPermTimes, 2))
 # Write times to CSV
-writecsv("./processed/S_perm_times.csv",  
+writecsv("../processed/S_perm_times.csv",  
          vcat(["plate" "mean" transpose(collect(1:reps))], 
               hcat(["1", "2", "3", "4", "5", "6", "Total"], 
                    mean(SPermTimes, 2), SPermTimes)))

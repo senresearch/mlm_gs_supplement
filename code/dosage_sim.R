@@ -3,23 +3,23 @@ library(mutoss) # adaptive Benjamini-Hochberg
 
 # Read in MLM p-values (dosage-response)
 pvalsDos = lapply(1:6, function(i){
-  read.csv(paste("./processed/dos_sim_p", i, "_pvalsDos.csv", sep=""), 
+  read.csv(paste("../processed/dos_sim_p", i, "_pvalsDos.csv", sep=""), 
            header=FALSE)
 })
 # Read in S score p-values (condition-concentrations)
 SPvals = lapply(1:6, function(i){
-  read.csv(paste("./processed/dos_sim_p", i, "_SPvals.csv", sep=""), 
+  read.csv(paste("../processed/dos_sim_p", i, "_SPvals.csv", sep=""), 
            header=FALSE)
 })
 # Read in S score p-values (conditions only)
 SPvalsCond = lapply(1:6, function(i){
-  read.csv(paste("./processed/dos_sim_p", i, "_SPvalsCond.csv", sep=""), 
+  read.csv(paste("../processed/dos_sim_p", i, "_SPvalsCond.csv", sep=""), 
            header=FALSE)
 })
 
 # Read in interactions
 interactions = lapply(1:6, function(i){
-  read.csv(paste("./processed/dos_sim_p", i, "_interactions.csv", sep=""), 
+  read.csv(paste("../processed/dos_sim_p", i, "_interactions.csv", sep=""), 
            header=FALSE)
 })
 
@@ -167,14 +167,14 @@ fpr = lapply(1:6, function(i) {
 myCols = c("firebrick3", "dodgerblue3", "forestgreen", "black", "snow4")
 myLines = c("solid", "dashed", "dotdash", "dotted", "dotted")
 
-png("./pictures/dos_sim_p%01d_ROC.png", width=380, height=380)
-par(mar=c(4.1,4.1,1.1,1.1))
+png("../pictures/dos_sim_p%01d_ROC.png", width=380, height=380)
+par(mar=c(4.1,4.1,2.1,2.1))
 
 AUCs = sapply(1:6, function(i) {
   # ROC curve for dosage-response (MLM)
   plot(c(0, fpr[[i]][,1]), c(0, tpr[[i]][,1]), col=myCols[1], lty=myLines[1], 
        xlab="False Positive Rate", ylab="True Positive Rate", 
-       xaxs="i", yaxs="i", type="l")
+       main=paste("Plate", i), xaxs="i", yaxs="i", type="l")
   # ROC curve for condition-concentrations
   lines(c(0, fpr[[i]][,2]), c(0, tpr[[i]][,2]), col=myCols[2], lty=myLines[2])
   # ROC curve for conditions only

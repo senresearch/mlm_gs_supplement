@@ -5,20 +5,20 @@ library(MESS) # AUC
 
 # Read in unique condition-concentration names
 Xnames = lapply(1:6, function(i){
-  unique(as.character(read.csv(paste0("./processed/processed_KEIO_data/p", i, 
+  unique(as.character(read.csv(paste0("../processed/processed_KEIO_data/p", i, 
                                       "_krit_cond_conc_names.csv"), 
                                header=FALSE)[,1]))
 })
 # Read in unique mutant names
 Znames = lapply(1:6, function(i){
-  unique(as.character(read.csv(paste0("./processed/processed_KEIO_data/p", i, 
+  unique(as.character(read.csv(paste0("../processed/processed_KEIO_data/p", i, 
                                       "_krit_mut_names.csv"), 
                                header=FALSE)[,1]))
 })
 
 # Read in MLM t-statistics
 tStats = lapply(1:6, function(i){
-  as.matrix(read.csv(paste("./processed/p", i, "_tStats.csv", sep=""), 
+  as.matrix(read.csv(paste("../processed/p", i, "_tStats.csv", sep=""), 
                      sep=",", header=FALSE))
 })
 # Use condition-concentrations and mutants for the interaction names
@@ -29,7 +29,7 @@ for (i in 1:6) {
 
 # Read in MLM p-values
 pvals = lapply(1:6, function(i){
-  as.matrix(read.csv(paste("./processed/p", i, "_pvals.csv", sep=""),
+  as.matrix(read.csv(paste("../processed/p", i, "_pvals.csv", sep=""),
                      sep=",", header=FALSE))
 })
 # Use condition-concentrations and mutants for the interaction names
@@ -73,7 +73,7 @@ mlmLabels = sapply(mlmAuxo, function(y){
 ###############################################################################
 
 # Read in Nichols auxotrophs (Supplemental Table 4)
-nicholsAuxo = read.csv("./data/NIHMS261392-supplement-04.csv", 
+nicholsAuxo = read.csv("../data/NIHMS261392-supplement-04.csv", 
                        header=TRUE, skip=1)
 # Pull out names of Nichols auxotrophs
 nicholsAuxoNames = na.omit(
@@ -96,7 +96,7 @@ mean(do.call(c, sapply(nicholsAuxoMin, function(x){
 nicholsAuxoMinDf = melt(nicholsAuxoMin)
 names(nicholsAuxoMinDf) = c("Cond_Conc", "Mutant", "tStat", "Plate")
 
-png("./pictures/nichols_auxo_dot.png", 480, 320)
+png("../pictures/nichols_auxo_dot.png", 480, 320)
 par(mar=c(4.1,4.1,1.1,1.1))
 
 # Dot plot of t-statistics corresponding to Nichols auxotrophs
@@ -122,7 +122,7 @@ nicholsTPR = apply(mlmLabels, 2, function(x){
 nicholsFPR = apply(mlmLabels, 2, function(x){
   1 - sum(x==nicholsLabels & x==FALSE)/sum(nicholsLabels==FALSE)})
 
-png("./pictures/nichols_auxo_ROC.png", 380, 380)
+png("../pictures/nichols_auxo_ROC.png", 380, 380)
 par(mar=c(4.1,4.1,1.1,1.1))
 
 # ROC curve
@@ -139,7 +139,7 @@ auc(nicholsFPR, nicholsTPR, type="spline")
 ###############################################################################
 
 # Read in Joyce auxotrophs (Supplemental Table 1)
-joyceAuxo = read.csv("./data/SupplementalDataResubmission_Tab1.csv", 
+joyceAuxo = read.csv("../data/SupplementalDataResubmission_Tab1.csv", 
                      header=2, skip=1)
 # Pull out names of Joyce auxotrophs
 joyceAuxoNames = intersect(as.character(
@@ -160,7 +160,7 @@ mean(do.call(c, sapply(joyceAuxoMin, function(x){
 joyceAuxoMinDf = melt(joyceAuxoMin)
 names(joyceAuxoMinDf) = c("Cond_Conc", "Mutant", "tStat", "Plate")
 
-png("./pictures/joyce_auxo_dot.png", 480, 320)
+png("../pictures/joyce_auxo_dot.png", 480, 320)
 par(mar=c(4.1,4.1,1.1,1.1))
 
 # Dot plot of t-statistics corresponding to Joyce auxotrophs
@@ -186,7 +186,7 @@ joyceTPR = apply(mlmLabels, 2, function(x){
 joyceFPR = apply(mlmLabels, 2, function(x){
   1 - sum(x==joyceLabels & x==FALSE)/sum(joyceLabels==FALSE)})
 
-png("./pictures/joyce_auxo_ROC.png", 380, 380)
+png("../pictures/joyce_auxo_ROC.png", 380, 380)
 par(mar=c(4.1,4.1,1.1,1.1))
 
 # ROC curve

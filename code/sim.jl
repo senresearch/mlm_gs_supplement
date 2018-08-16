@@ -1,5 +1,5 @@
 # Matrix linear models for genetic screening data
-@everywhere include("../mlm_packages/GeneticScreen/src/GeneticScreen.jl")
+@everywhere include("../../mlm_packages/GeneticScreen/src/GeneticScreen.jl")
 @everywhere using GeneticScreen
 
 # DataFrames
@@ -177,15 +177,15 @@ for i in 1:6
     
     # Read in data for each plate
     # Colony opacity
-    Y = readtable(string("./processed/processed_KEIO_data/p", i, 
+    Y = readtable(string("../processed/processed_KEIO_data/p", i, 
                   "_krit_dat.csv"), separator=',', header=true)
     
     # Conditions
-    X = readtable(string("./processed/processed_KEIO_data/p", i, 
+    X = readtable(string("../processed/processed_KEIO_data/p", i, 
                   "_krit_cond.csv"), separator=',', header=true)
     
     # Mutant keys
-    Z = readtable(string("./data/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
+    Z = readtable(string("../data/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
                   separator='\t', header=true)
     
     # Simulate interactions and response matrix
@@ -207,17 +207,17 @@ for i in 1:6
     srand(i)
     tStats, pvals = mlm_backest_sum_perms(MLMSimData, nPerms)
     # Write to CSV
-    writecsv(string("./processed/sim_p", i, "_tStats.csv"), tStats)
-    writecsv(string("./processed/sim_p", i, "_pvals.csv"), pvals)
+    writecsv(string("../processed/sim_p", i, "_tStats.csv"), tStats)
+    writecsv(string("../processed/sim_p", i, "_pvals.csv"), pvals)
     
     # Run S scores
     srand(i)
     S, SPvals = S_score_perms(SSimData, nPerms)
     # Write to CSV
-    writecsv(string("./processed/sim_p", i, "_S.csv"), S)
-    writecsv(string("./processed/sim_p", i, "_SPvals.csv"), SPvals)
+    writecsv(string("../processed/sim_p", i, "_S.csv"), S)
+    writecsv(string("../processed/sim_p", i, "_SPvals.csv"), SPvals)
     
     # Write simulated interactions to CSV 
-    writecsv(string("./processed/sim_p", i, "_interactions.csv"), interactions)
+    writecsv(string("../processed/sim_p", i, "_interactions.csv"), interactions)
     
 end

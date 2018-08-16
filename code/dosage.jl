@@ -1,5 +1,5 @@
 # Matrix linear models for genetic screening data
-@everywhere include("../mlm_packages/GeneticScreen/src/GeneticScreen.jl")
+@everywhere include("../../mlm_packages/GeneticScreen/src/GeneticScreen.jl")
 @everywhere using GeneticScreen
 
 # DataFrames
@@ -113,15 +113,15 @@ for i in 1:6
     
     # Read in data for each plate
     # Colony opacity
-    Y = readtable(string("./processed/processed_KEIO_data/p", i, 
+    Y = readtable(string("../processed/processed_KEIO_data/p", i, 
                   "_krit_dat.csv"), separator=',', header=true)
     
     # Conditions
-    X = readtable(string("./processed/processed_KEIO_data/p", i, 
+    X = readtable(string("../processed/processed_KEIO_data/p", i, 
                   "_krit_cond.csv"), separator=',', header=true)
     
     # Mutant keys
-    Z = readtable(string("./data/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
+    Z = readtable(string("../data/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
                   separator='\t', header=true)
     
     # Dosage slopes
@@ -135,8 +135,8 @@ for i in 1:6
     	                                        isXIntercept=false, 
     	                                        isXSum=false)
     # Write to CSV
-    writecsv(string("./processed/p", i, "_tStatsDos.csv"), tStatsDos)
-    writecsv(string("./processed/p", i, "_pvalsDos.csv"), pvalsDos)
+    writecsv(string("../processed/p", i, "_tStatsDos.csv"), tStatsDos)
+    writecsv(string("../processed/p", i, "_pvalsDos.csv"), pvalsDos)
     
     # Put together RawData object for matrix linear models 
     MLMData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
@@ -146,8 +146,8 @@ for i in 1:6
     srand(i)
     tStats, pvals = mlm_backest_sum_perms(MLMData, nPerms)
     # Write to CSV
-    writecsv(string("./processed/p", i, "_tStats.csv"), tStats)
-    writecsv(string("./processed/p", i, "_pvals.csv"), pvals)
+    writecsv(string("../processed/p", i, "_tStats.csv"), tStats)
+    writecsv(string("../processed/p", i, "_pvals.csv"), pvals)
     
     # Put together RawData object for S scores
     SData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
@@ -157,7 +157,7 @@ for i in 1:6
     srand(i)
     S, SPvals = S_score_perms(SData, nPerms)
     # Write to CSV
-    writecsv(string("./processed/p", i, "_S.csv"), S)
-    writecsv(string("./processed/p", i, "_SPvals.csv"), SPvals)
+    writecsv(string("../processed/p", i, "_S.csv"), S)
+    writecsv(string("../processed/p", i, "_SPvals.csv"), SPvals)
     
 end
