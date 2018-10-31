@@ -59,7 +59,7 @@ quantCutoff = 0.95
 # Range of median cutoffs used to determine auxotroph status
 cutoffs = seq(-30, 30, by=0.5)
 # Pull out the mutants whose t-statistics corresponding to minimial media 
-# conditions have medians below the cutoffs
+# conditions that have medians below the cutoffs
 mlmAuxo = lapply(cutoffs, function(cutoff){
   names(do.call(c, sapply(lapply(1:6, function(i){
     apply(tStats[[i]][minimalIdx[[i]],], 2, median)}), function(x){
@@ -199,3 +199,76 @@ dev.off()
 
 # AUC
 auc(joyceFPR, joyceTPR, type="spline")
+
+###############################################################################
+
+# Read in Kritikos S-scores (Supplemental Table 3)
+kritikosSscores = read.csv("../data/opacity.s.scores.csv")
+
+# Read in Kritikos Supplemental Table 2 to get conversion for gene names
+kritikosST2 = read.csv("../data/NIHMS72934-supplement-Supplementary_table_2.csv")
+
+# Minimal media conditions (Nichols had two levels of glycerol; Kritikos had one)
+minMediaConds = data.frame(nichols=unique(nicholsAuxoMinDf$Cond_Conc), 
+                           kritikos = c("ACETATE", "GLUCOSAMINE", "
+                                        N.ACETYLGLUCOSAMINE", "GLUCOSE", 
+                                        "GLYCEROL", "GLYCEROL", 
+                                        "HIGHFE", "LOWFE", 
+                                        "MALTOSE", "SUCCINATE"))
+
+# All auxotrophs identified either by Nichols or Joyce
+NicholsJoyceAuxoNames = unique(tolower(c(nicholsAuxoNames, joyceAuxoNames)))
+
+# Subset Kritikos S-scores corresponding to minimal media conditions
+kritikosSscoresMin = kritikosSscores[kritikosSscores$condition.trim %in% 
+                                       minMediaConds$kritikos, ]
+# Merge with Supplemental Table 2 to get compatible gene names
+kritikosSscoresMin = merge(kritikosSscoresMin, kritikosST2[,1:2], 
+                           by.x='gene', by.y='gene.ID', all.x=TRUE, all.y=FALSE) 
+# Keep only S-scores corresponding to Nichols/Joyce auxotrophs
+kritikosSscoresMin = lapply(NicholsJoyceAuxoNames, function(x){
+  kritikosSscoresMin[which(tolower(as.character(kritikosSscoresMin$gene.name))==x),]
+})
+
+# Designate Kritikos auxotrophs using quantile cutoffs for S-scores
+kritikosSscoresAuxo = sapply(kritikosSscoresMin, function(x){
+  quantile(x$s.score, quantCutoff, na.rm=TRUE)
+})
+
+# Put together a DataFrame summarizing all four types of auxotrophs
+allAuxoDf = data.frame(gene = NicholsJoyceAuxoNames, 
+                       isNicholsAuxo = NicholsJoyceAuxoNames %in% tolower(nicholsAuxoNames), 
+                       isJoyceAuxo = NicholsJoyceAuxoNames %in% tolower(joyceAuxoNames), 
+                       isKritikosAuxo = kritikosSscoresAuxo < 0, 
+                       isMLMAuxo = NicholsJoyceAuxoNames %in% unique(tolower(
+                         c(names(which(do.call(c, sapply(nicholsAuxoMin, function(x){
+                           apply(x, 2, quantile, quantCutoff)})) < 0)), 
+                           names(which(do.call(c, sapply(joyceAuxoMin, function(x){
+                             apply(x, 2, quantile, quantCutoff)})) < 0)))
+                       )))
+
+# Nichols auxotrophs that are not identified by either Kritikos S scores or MLM
+allAuxoDf[allAuxoDf$isNicholsAuxo & 
+            (allAuxoDf$isKritikosAuxo==FALSE & 
+               allAuxoDf$isMLMAuxo==FALSE),]
+# Nichols auxotrophs that are only identified by Kritikos S scores
+allAuxoDf[allAuxoDf$isNicholsAuxo & 
+            allAuxoDf$isKritikosAuxo==TRUE &
+            allAuxoDf$isMLMAuxo==FALSE,]
+# Nichols auxotrophs that are only identified by MLM 
+allAuxoDf[allAuxoDf$isNicholsAuxo & 
+            allAuxoDf$isKritikosAuxo==FALSE &
+            allAuxoDf$isMLMAuxo==TRUE,]
+
+# Joyce auxotrophs that are not identified by either Kritikos S scores or MLM
+allAuxoDf[allAuxoDf$isJoyceAuxo & 
+            (allAuxoDf$isKritikosAuxo==FALSE & 
+               allAuxoDf$isMLMAuxo==FALSE),]
+# Joyce auxotrophs that are only identified by Kritikos S scores
+allAuxoDf[allAuxoDf$isJoyceAuxo & 
+            allAuxoDf$isKritikosAuxo==TRUE &
+            allAuxoDf$isMLMAuxo==FALSE,]
+# Joyce auxotrophs that are only identified by MLM 
+allAuxoDf[allAuxoDf$isJoyceAuxo & 
+            allAuxoDf$isKritikosAuxo==FALSE &
+            allAuxoDf$isMLMAuxo==TRUE,]
