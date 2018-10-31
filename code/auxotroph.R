@@ -210,8 +210,8 @@ kritikosST2 = read.csv("../data/NIHMS72934-supplement-Supplementary_table_2.csv"
 
 # Minimal media conditions (Nichols had two levels of glycerol; Kritikos had one)
 minMediaConds = data.frame(nichols=unique(nicholsAuxoMinDf$Cond_Conc), 
-                           kritikos = c("ACETATE", "GLUCOSAMINE", "
-                                        N.ACETYLGLUCOSAMINE", "GLUCOSE", 
+                           kritikos = c("ACETATE", "GLUCOSAMINE", 
+                                        "N.ACETYLGLUCOSAMINE", "GLUCOSE", 
                                         "GLYCEROL", "GLYCEROL", 
                                         "HIGHFE", "LOWFE", 
                                         "MALTOSE", "SUCCINATE"))
