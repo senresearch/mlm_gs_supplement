@@ -1,5 +1,4 @@
 # Load libraries
-library(qvalue) # estimate the q-values for a given set of p-values
 library(reshape2) # reshape data frames
 library(MESS) # AUC
 
@@ -37,13 +36,6 @@ for (i in 1:6) {
   rownames(pvals[[i]]) = Xnames[[i]]
   colnames(pvals[[i]]) = Znames[[i]]
 }
-
-# Convert MLM p-values to q-values, FDR=0.05
-# The rounding to the 14th decimal place is necessary because for some reason, 
-# the 1s get read in as slightly larger than 1
-qvals = lapply(pvals, function(x, ...){
-  qvalue(round(x, 14), ...)
-}, pi0.method="bootstrap", fdr.level=0.05)
 
 
 # Indices of minimal media conditions for each plate
