@@ -205,20 +205,21 @@ for i in 1:6
     Random.seed!(i)
     tStats, pvals = mlm_backest_sum_perms(MLMSimData, nPerms)
     # Write to CSV
-    CSV.write((string("../processed/sim_p", i, "_tStats.csv"), 
-                      DataFrame(tStats))
-    CSV.write((string("../processed/sim_p", i, "_pvals.csv"), DataFrame(pvals))
+    CSV.write(string("../processed/sim_p", i, "_tStats.csv"), 
+                      DataFrame(tStats), writeheader=false)
+    CSV.write(string("../processed/sim_p", i, "_pvals.csv"), 
+                      DataFrame(pvals), writeheader=false)
     
     # Run S scores
     Random.seed!(i)
     S, SPvals = S_score_perms(SSimData, nPerms)
     # Write to CSV
-    CSV.write((string("../processed/sim_p", i, "_S.csv"), DataFrame(S))
-    CSV.write((string("../processed/sim_p", i, "_SPvals.csv"), 
-              DataFrame(SPvals))
+    CSV.write(string("../processed/sim_p", i, "_S.csv"), DataFrame(S))
+    CSV.write(string("../processed/sim_p", i, "_SPvals.csv"), 
+              DataFrame(SPvals), writeheader=false)
     
     # Write simulated interactions to CSV 
-    CSV.write((string("../processed/sim_p", i, "_interactions.csv"), 
-              DataFrame(interactions))
+    CSV.write(string("../processed/sim_p", i, "_interactions.csv"), 
+              DataFrame(interactions), writeheader=false)
     
 end

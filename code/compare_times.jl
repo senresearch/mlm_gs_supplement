@@ -1,8 +1,8 @@
 using Distributed
 using DataFrames
+using Statistics
 using Random
 using CSV
-using Statistics
 
 # Matrix linear models for genetic screening data
 @everywhere include("../../mlm_packages/GeneticScreen/src/GeneticScreen.jl")
@@ -79,7 +79,8 @@ println(Statistics.mean(mlmTimes, dims=2))
 CSV.write("../processed/mlm_times.csv",  
           DataFrame(vcat(["plate" "mean" transpose(collect(1:reps))], 
                          hcat(["1", "2", "3", "4", "5", "6", "Total"], 
-                              Statistics.mean(mlmTimes, dims=2), mlmTimes))))
+                              Statistics.mean(mlmTimes, dims=2), mlmTimes))), 
+          writeheader=false)
 
 # S scores
 # Drop the dry run
@@ -92,7 +93,8 @@ println(Statistics.mean(STimes, dims=2))
 CSV.write("../processed/S_times.csv",  
           DataFrame(vcat(["plate" "mean" transpose(collect(1:reps))], 
                          hcat(["1", "2", "3", "4", "5", "6", "Total"], 
-                              Statistics.mean(STimes, dims=2), STimes))))
+                              Statistics.mean(STimes, dims=2), STimes))), 
+          writeheader=false)
 
 # Matrix linear model permutations
 # Drop the dry run
@@ -106,7 +108,7 @@ CSV.write("../processed/mlm_perm_times.csv",
           DataFrame(vcat(["plate" "mean" transpose(collect(1:reps))], 
                          hcat(["1", "2", "3", "4", "5", "6", "Total"], 
                               Statistics.mean(mlmPermTimes, dims=2), 
-                              mlmPermTimes))))
+                              mlmPermTimes))), writeheader=false)
 # S score permutations
 # Drop the dry run
 SPermTimes = SPermTimes[:,2:end]
@@ -119,4 +121,4 @@ CSV.write("../processed/S_perm_times.csv",
           DataFrame(vcat(["plate" "mean" transpose(collect(1:reps))], 
                          hcat(["1", "2", "3", "4", "5", "6", "Total"], 
                               Statistics.mean(SPermTimes, dims=2), 
-                              SPermTimes))))
+                              SPermTimes))), writeheader=false)

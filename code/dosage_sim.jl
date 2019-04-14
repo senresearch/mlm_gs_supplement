@@ -193,9 +193,9 @@ for i in 1:6
     	                                        isXSum=false)
     # Write to CSV
     CSV.write(string("../processed/dos_sim_p", i, "_tStatsDos.csv"), 
-              DataFrame(tStatsDos))
+              DataFrame(tStatsDos), writeheader=false)
     CSV.write(string("../processed/dos_sim_p", i, "_pvalsDos.csv"), 
-              DataFrame(pvalsDos))
+              DataFrame(pvalsDos), writeheader=false)
 	
     # Put together RawData object for S scores (condition-concentrations)
     SSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
@@ -205,9 +205,10 @@ for i in 1:6
     Random.seed!(i)
     S, SPvals = S_score_perms(SSimData, nPerms)
     # Write to CSV
-    CSV.write(string("../processed/dos_sim_p", i, "_S.csv"), DataFrame(S))
+    CSV.write(string("../processed/dos_sim_p", i, "_S.csv"), 
+              DataFrame(S), writeheader=false)
     CSV.write(string("../processed/dos_sim_p", i, "_SPvals.csv"), 
-              DataFrame(SPvals))
+              DataFrame(SPvals), writeheader=false)
     
     # Put together RawData object for S scores (conditions only)
     SCondSimData = read_plate(X[[:Condition]], YSim, Z[[:name]]; 
@@ -218,12 +219,12 @@ for i in 1:6
     SCond, SPvalsCond = S_score_perms(SCondSimData, nPerms)
     # Write to CSV
     CSV.write(string("../processed/dos_sim_p", i, "_SCond.csv"), 
-              DataFrame(SCond))
+              DataFrame(SCond), writeheader=false)
     CSV.write(string("../processed/dos_sim_p", i, "_SPvalsCond.csv"), 
-              DataFrame(SPvalsCond))
+              DataFrame(SPvalsCond), writeheader=false)
     
     # Write simulated interactions to CSV 
     CSV.write(string("../processed/dos_sim_p", i, "_interactions.csv"), 
-              DataFrame(interactions))
+              DataFrame(interactions), writeheader=false)
     
 end

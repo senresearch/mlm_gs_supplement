@@ -77,8 +77,7 @@ function get_XDos(X, conditionVar, concentrationVar)
                 # first split, assuming that concentration increases with the 
                 # magnitude of the first split.
                 else
-                    idx = sortperm([Meta.parse(Float64, spl[1]) 
-                                    for spl in splits])
+                    idx = sortperm([parse(Float64, spl[1]) for spl in splits])
                 end
 
             # If the first character in each of the second splits is an SI 
@@ -86,10 +85,11 @@ function get_XDos(X, conditionVar, concentrationVar)
             # dictionary) and then sort the first splits within each prefix. 
             elseif (all([spl[2][1] in ['m','u','n','p'] for spl in splits]))
                 A = hcat([SIDict[spl[2][1]] for spl in splits], 
-                         [Meta.parse(spl[1]) for spl in (splits)],
-                          collect(1:length(splits)))
-                idx = sortslices(A, dims=1, by=x->(x[1],x[2]))[:,3]
-
+                         [parse(Float64, spl[1]) for spl in (splits)],
+                         collect(1:length(splits)))
+                idx = convert(Array{Int64,1}, 
+                              sortslices(A, dims=1, by=x->(x[1],x[2]))[:,3])
+            
             # Raise an error if no case was met. 
             else
                 print(splits)
@@ -139,9 +139,9 @@ for i in 1:6
     	                                        isXSum=false)
     # Write to CSV
     CSV.write(string("../processed/p", i, "_tStatsDos.csv"), 
-              DataFrame(tStatsDos))
+              DataFrame(tStatsDos), writeheader=false)
     CSV.write(string("../processed/p", i, "_pvalsDos.csv"), 
-              DataFrame(pvalsDos))
+              DataFrame(pvalsDos), writeheader=false)
     
     # Put together RawData object for matrix linear models 
     MLMData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
@@ -151,8 +151,10 @@ for i in 1:6
     Random.seed!(i)
     tStats, pvals = mlm_backest_sum_perms(MLMData, nPerms)
     # Write to CSV
-    CSV.write(string("../processed/p", i, "_tStats.csv"), DataFrame(tStats))
-    CSV.write(string("../processed/p", i, "_pvals.csv"), DataFrame(pvals))
+    CSV.write(string("../processed/p", i, "_tStats.csv"), 
+              DataFrame(tStats), writeheader=false)
+    CSV.write(string("../processed/p", i, "_pvals.csv"), 
+              DataFrame(pvals), writeheader=false)
     
     # Put together RawData object for S scores
     SData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
@@ -162,7 +164,9 @@ for i in 1:6
     Random.seed!(i)
     S, SPvals = S_score_perms(SData, nPerms)
     # Write to CSV
-    CSV.write(string("../processed/p", i, "_S.csv"), DataFrame(S))
-    CSV.write(string("../processed/p", i, "_SPvals.csv"), DataFrame(SPvals))
+    CSV.write(string("../processed/p", i, "_S.csv"), 
+              DataFrame(S), writeheader=false)
+    CSV.write(string("../processed/p", i, "_SPvals.csv"), 
+              DataFrame(SPvals), writeheader=false)
     
 end
