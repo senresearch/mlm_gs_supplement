@@ -1,11 +1,12 @@
+using Distributed
+using DataFrames
+using Distributions
+using Random
+using CSV
+
 # Matrix linear models for genetic screening data
 @everywhere include("../../mlm_packages/GeneticScreen/src/GeneticScreen.jl")
-@everywhere using GeneticScreen
-
-# DataFrames
-using DataFrames
-# Distributions
-using Distributions
+@everywhere using Main.GeneticScreen
 
 
 """
@@ -29,7 +30,6 @@ distribution. The remaining effects will be set to zero.
 1d array of floats 
 
 """
-
 function sim_effect(n::Int64, propNonzero::Float64=1/2, 
                     eDist::Distribution=Normal(0,2))
     # Initialize vector for storing effects 
@@ -70,7 +70,6 @@ Simulate response matrix Y using given main and interaction effects
 2d array of floats
 
 """
-
 function make_Y(condEff::Array{Float64,1}, mutEff::Array{Float64,1}, 
                 interactions::Array{Float64,2}, 
                 XNoint::Array{Float64,2}, ZNoint::Array{Float64,2}; 
@@ -81,13 +80,13 @@ function make_Y(condEff::Array{Float64,1}, mutEff::Array{Float64,1},
     m = size(ZNoint,1)
     
     # Initialize array for fixed effects
-    fixedEff = Array{Float64}(n, m)
+    fixedEff = Array{Float64}(undef, n, m)
     # Put together mutant (column) and interaction effects
     for i = 1:n 
         for j = 1:m 
-            fixedEff[i,j] = (mutEff[find(ZNoint[j,:] .== 1)] + 
-            	             interactions[find(XNoint[i,:] .== 1), 
-            	                          find(ZNoint[j,:] .== 1)])[1]
+            fixedEff[i,j] = (mutEff[findall(ZNoint[j,:] .== 1)] + 
+            	               interactions[findall(XNoint[i,:] .== 1), 
+            	                            findall(ZNoint[j,:] .== 1)])[1]
         end
     end
     # Add on the plate condition (row) effects
@@ -135,7 +134,6 @@ passed in by user
 1d array of effects 
 
 """
-
 function sim_data(X::DataFrames.DataFrame, Z::DataFrames.DataFrame, 
                   XCVar::Symbol, ZCVar::Symbol;
                   interNonzero::Float64=1/4, 
@@ -146,8 +144,8 @@ function sim_data(X::DataFrames.DataFrame, Z::DataFrames.DataFrame,
     
     # Over-parameterized treatment contrasts for the levels of the row and 
     # column effects 
-    XNoint = convert(Array{Float64}, contr(X, [XCVar], ["noint"]))
-    ZNoint = convert(Array{Float64}, contr(Z, [ZCVar], ["noint"]))
+    XNoint = convert(Array{Float64,2}, contr(X, [XCVar], ["noint"]))
+    ZNoint = convert(Array{Float64,2}, contr(Z, [ZCVar], ["noint"]))
     
     # Dimensions of data
     n = size(XNoint, 1)
@@ -177,20 +175,20 @@ for i in 1:6
     
     # Read in data for each plate
     # Colony opacity
-    Y = readtable(string("../processed/processed_KEIO_data/p", i, 
-                  "_krit_dat.csv"), separator=',', header=true)
+    Y = CSV.read(string("../processed/processed_KEIO_data/p", i, 
+                        "_krit_dat.csv"), delim=',', header=true) 
     
     # Conditions
-    X = readtable(string("../processed/processed_KEIO_data/p", i, 
-                  "_krit_cond.csv"), separator=',', header=true)
+    X = CSV.read(string("../processed/processed_KEIO_data/p", i, 
+                        "_krit_cond.csv"), delim=',', header=true) 
     
     # Mutant keys
-    Z = readtable(string("../data/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
-                  separator='\t', header=true)
+    Z = CSV.read(string("../processed/raw_KEIO_data/KEIO", i, 
+                        "_KEY.csv"), delim='\t', header=true) 
     
     # Simulate interactions and response matrix
-    srand(10+i)
-	interactions, YSim = sim_data(X[[:Cond_Conc]], Z[[:name]], 
+    Random.seed!(10+i)
+	  interactions, YSim = sim_data(X[[:Cond_Conc]], Z[[:name]], 
                                   :Cond_Conc, :name)
     
     # Put together RawData object for matrix linear models
@@ -204,20 +202,23 @@ for i in 1:6
                           XCType="noint", ZCType="noint", isYstd=true)
     
     # Run matrix linear models
-    srand(i)
+    Random.seed!(i)
     tStats, pvals = mlm_backest_sum_perms(MLMSimData, nPerms)
     # Write to CSV
-    writecsv(string("../processed/sim_p", i, "_tStats.csv"), tStats)
-    writecsv(string("../processed/sim_p", i, "_pvals.csv"), pvals)
+    CSV.write((string("../processed/sim_p", i, "_tStats.csv"), 
+                      DataFrame(tStats))
+    CSV.write((string("../processed/sim_p", i, "_pvals.csv"), DataFrame(pvals))
     
     # Run S scores
-    srand(i)
+    Random.seed!(i)
     S, SPvals = S_score_perms(SSimData, nPerms)
     # Write to CSV
-    writecsv(string("../processed/sim_p", i, "_S.csv"), S)
-    writecsv(string("../processed/sim_p", i, "_SPvals.csv"), SPvals)
+    CSV.write((string("../processed/sim_p", i, "_S.csv"), DataFrame(S))
+    CSV.write((string("../processed/sim_p", i, "_SPvals.csv"), 
+              DataFrame(SPvals))
     
     # Write simulated interactions to CSV 
-    writecsv(string("../processed/sim_p", i, "_interactions.csv"), interactions)
+    CSV.write((string("../processed/sim_p", i, "_interactions.csv"), 
+              DataFrame(interactions))
     
 end

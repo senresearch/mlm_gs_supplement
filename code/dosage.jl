@@ -1,9 +1,11 @@
+using Distributed
+using DataFrames
+using Random
+using CSV
+
 # Matrix linear models for genetic screening data
 @everywhere include("../../mlm_packages/GeneticScreen/src/GeneticScreen.jl")
-@everywhere using GeneticScreen
-
-# DataFrames
-using DataFrames
+@everywhere using Main.GeneticScreen
 
 
 """
@@ -26,7 +28,6 @@ to dosage slopes
 DataFrame
 
 """
-
 function get_XDos(X, conditionVar, concentrationVar)
 
     # Pull out every condition 
@@ -48,11 +49,11 @@ function get_XDos(X, conditionVar, concentrationVar)
             # If there is only one concentration level, there are no true 
             # slopes; set all levels to 1. 
             XDos[(X[conditionVar] .== allConds[i]) .& 
-                 (X[concentrationVar] .== unique(concs[i])[1]), i] = 1
+                 (X[concentrationVar] .== unique(concs[i])[1]), i] .= 1
         else 
             # For every condition, split the concentration levels on 
             # "sec", "%", and spaces. 
-            splits = [split(x, r"sec|%|\s", keep=false) 
+            splits = [split(x, r"sec|%|\s", keepempty=false) 
                       for x in unique(concs[i])]
             
             # If there is only one split for each concentration level 
@@ -63,7 +64,8 @@ function get_XDos(X, conditionVar, concentrationVar)
                 # Check that if the first split is non-numeric, that it is 
                 # `high` or `low`. Then order the splits so that `low` comes 
                 # before `high`. 
-                if (all([isnull(tryparse(Float64, spl[1])) for spl in splits]))
+                if (all([tryparse(Float64, spl[1])===nothing 
+                         for spl in splits]))
                     if (all([spl[1] in ["high", "low"] for spl in splits]))
                         idx = sortperm([spl[1] for spl in splits], rev=true)
                     else 
@@ -75,7 +77,8 @@ function get_XDos(X, conditionVar, concentrationVar)
                 # first split, assuming that concentration increases with the 
                 # magnitude of the first split.
                 else
-                    idx = sortperm([parse(Float64, spl[1]) for spl in splits])
+                    idx = sortperm([Meta.parse(Float64, spl[1]) 
+                                    for spl in splits])
                 end
 
             # If the first character in each of the second splits is an SI 
@@ -83,9 +86,9 @@ function get_XDos(X, conditionVar, concentrationVar)
             # dictionary) and then sort the first splits within each prefix. 
             elseif (all([spl[2][1] in ['m','u','n','p'] for spl in splits]))
                 A = hcat([SIDict[spl[2][1]] for spl in splits], 
-                         [parse(spl[1]) for spl in (splits)],
+                         [Meta.parse(spl[1]) for spl in (splits)],
                           collect(1:length(splits)))
-                idx = sortrows(A, by=x->(x[1],x[2]))[:,3]
+                idx = sortslices(A, dims=1, by=x->(x[1],x[2]))[:,3]
 
             # Raise an error if no case was met. 
             else
@@ -96,7 +99,7 @@ function get_XDos(X, conditionVar, concentrationVar)
             # Assign slopes for each condition. 
             for j in 1:length(unique(concs[i]))
                 XDos[(X[conditionVar] .== allConds[i]) .& 
-                     (X[concentrationVar] .== unique(concs[i])[idx][j]), i] = j
+                     (X[concentrationVar] .== unique(concs[i])[idx][j]), i] .= j
             end
         end
     end
@@ -113,16 +116,16 @@ for i in 1:6
     
     # Read in data for each plate
     # Colony opacity
-    Y = readtable(string("../processed/processed_KEIO_data/p", i, 
-                  "_krit_dat.csv"), separator=',', header=true)
+    Y = CSV.read(string("../processed/processed_KEIO_data/p", i, 
+                        "_krit_dat.csv"), delim=',', header=true) 
     
     # Conditions
-    X = readtable(string("../processed/processed_KEIO_data/p", i, 
-                  "_krit_cond.csv"), separator=',', header=true)
+    X = CSV.read(string("../processed/processed_KEIO_data/p", i, 
+                        "_krit_cond.csv"), delim=',', header=true) 
     
     # Mutant keys
-    Z = readtable(string("../data/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
-                  separator='\t', header=true)
+    Z = CSV.read(string("../processed/raw_KEIO_data/KEIO", i, 
+                        "_KEY.csv"), delim='\t', header=true) 
     
     # Dosage slopes
     XDos = get_XDos(X, :Condition, :Concentration)
@@ -130,34 +133,36 @@ for i in 1:6
     MLMDosData = read_plate(XDos, Y, Z[[:name]]; 
                             ZCVar=:name, ZCType="sum", isYstd=true)
     # Run matrix linear models (dosage-response)
-    srand(i)
+    Random.seed!(i)
     tStatsDos, pvalsDos = mlm_backest_sum_perms(MLMDosData, nPerms; 
     	                                        isXIntercept=false, 
     	                                        isXSum=false)
     # Write to CSV
-    writecsv(string("../processed/p", i, "_tStatsDos.csv"), tStatsDos)
-    writecsv(string("../processed/p", i, "_pvalsDos.csv"), pvalsDos)
+    CSV.write(string("../processed/p", i, "_tStatsDos.csv"), 
+              DataFrame(tStatsDos))
+    CSV.write(string("../processed/p", i, "_pvalsDos.csv"), 
+              DataFrame(pvalsDos))
     
     # Put together RawData object for matrix linear models 
     MLMData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
                             XCVar=:Cond_Conc, ZCVar=:name,
                             XCType="sum", ZCType="sum", isYstd=true)
     # Run matrix linear models
-    srand(i)
+    Random.seed!(i)
     tStats, pvals = mlm_backest_sum_perms(MLMData, nPerms)
     # Write to CSV
-    writecsv(string("../processed/p", i, "_tStats.csv"), tStats)
-    writecsv(string("../processed/p", i, "_pvals.csv"), pvals)
+    CSV.write(string("../processed/p", i, "_tStats.csv"), DataFrame(tStats))
+    CSV.write(string("../processed/p", i, "_pvals.csv"), DataFrame(pvals))
     
     # Put together RawData object for S scores
     SData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
                           XCVar=:Cond_Conc, ZCVar=:name,
                           XCType="noint", ZCType="noint", isYstd=true)
     # Run S scores
-    srand(i)
+    Random.seed!(i)
     S, SPvals = S_score_perms(SData, nPerms)
     # Write to CSV
-    writecsv(string("../processed/p", i, "_S.csv"), S)
-    writecsv(string("../processed/p", i, "_SPvals.csv"), SPvals)
+    CSV.write(string("../processed/p", i, "_S.csv"), DataFrame(S))
+    CSV.write(string("../processed/p", i, "_SPvals.csv"), DataFrame(SPvals))
     
 end

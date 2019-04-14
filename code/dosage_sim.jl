@@ -1,11 +1,12 @@
+using Distributed
+using DataFrames
+using Distributions
+using Random
+using CSV
+
 # Matrix linear models for genetic screening data
 @everywhere include("../../mlm_packages/GeneticScreen/src/GeneticScreen.jl")
-@everywhere using GeneticScreen
-
-# DataFrames
-using DataFrames
-# Distributions
-using Distributions
+@everywhere using Main.GeneticScreen
 
 
 """
@@ -29,7 +30,6 @@ distribution. The remaining effects will be set to zero.
 1d array of floats 
 
 """
-
 function sim_effect(n::Int64, propNonzero::Float64=1/2, 
                     eDist::Distribution=Normal(0,2))
     # Initialize vector for storing effects 
@@ -65,10 +65,9 @@ levels; see description
 1d array of floats 
 
 """
-
 function sim_exp_dos_effect(levs::Int64, alpha::Float64, beta::Float64)
     # Initialize vector for storing effects 
-    effect = Array{Float64}(levs)
+    effect = Array{Float64}(undef, levs)
     
     # Simulate effects for each level
     for i = 1:levs
@@ -113,7 +112,6 @@ levels; see description. Defaults to `0.5`.
 1d array of floats 
 
 """
-
 function sim_dos_data(p::Int64, levs::Int64, reps::Int64, 
 	                  Z::DataFrames.DataFrame, ZCVar::Symbol; 
 	                  alpha::Float64=0.8, beta::Float64=0.5, 
@@ -121,7 +119,7 @@ function sim_dos_data(p::Int64, levs::Int64, reps::Int64,
     
     # Over-parameterized treatment contrasts for the levels of the column 
     # effects 
-    ZNoint = convert(Array{Float64}, contr(Z, [ZCVar], ["noint"]))
+    ZNoint = convert(Array{Float64,2}, contr(Z, [ZCVar], ["noint"]))
     
     # Dimensions of data
     n = p*levs*reps
@@ -129,14 +127,16 @@ function sim_dos_data(p::Int64, levs::Int64, reps::Int64,
     m = size(ZNoint, 1)
     
     # Generate names of conditions and concentrations (dosage levels) 
-    Condition = repeat(collect('A':'Z')[1:p], inner=reps*levs)
-    Concentration = repeat(collect(1:levs), outer=reps*p)
+    Condition = [string(x) for x in repeat(collect('A':'Z')[1:p], 
+                                           inner=reps*levs)]
+    Concentration = [string(x) for x in repeat(collect(1:levs), outer=reps*p)]
     
     # Initialize array for condition-concentration combinations
-    Cond_Conc = Array{String}(n)
+    Cond_Conc = Array{String}(undef, n)
     # Concatenate conditions and concentrations (dosage levels)
     for i in 1:n
-        Cond_Conc[i] = string(Condition[i], lpad(Concentration[i], 2, 0))
+        Cond_Conc[i] = string(Condition[i], 
+                              lpad(Concentration[i], 2, string(0)))
     end
     
     # Put together DataFrame of row condition and concentration effects
@@ -174,11 +174,11 @@ for i in 1:6
     
     # Read in data for each plate
     # Mutant keys
-    Z = readtable(string("../data/raw_KEIO_data/KEIO", i, "_KEY.csv"), 
-                  separator='\t', header=true)
+    Z = CSV.read(string("../processed/raw_KEIO_data/KEIO", i, 
+                        "_KEY.csv"), delim='\t', header=true) 
     
     # Simulate interactions, conditions and concentrations, and response matrix
-    srand(10+i)
+    Random.seed!(10+i)
     interactions, X, YSim = sim_dos_data(p, levs, reps, Z[[:name]], :name)
     
     # Put together RawData object for matrix linear models (dosage-response)
@@ -187,38 +187,43 @@ for i in 1:6
                                isXDos=true, XConditionVar=:Condition, 
                                XConcentrationVar=:Concentration, isYstd=true)
     # Run matrix linear models (dosage-response)
-    srand(i)
+    Random.seed!(i)
     tStatsDos, pvalsDos = mlm_backest_sum_perms(MLMDosSimData, nPerms; 
     	                                        isXIntercept=false, 
     	                                        isXSum=false)
     # Write to CSV
-    writecsv(string("../processed/dos_sim_p", i, "_tStatsDos.csv"), tStatsDos)
-    writecsv(string("../processed/dos_sim_p", i, "_pvalsDos.csv"), pvalsDos)
+    CSV.write(string("../processed/dos_sim_p", i, "_tStatsDos.csv"), 
+              DataFrame(tStatsDos))
+    CSV.write(string("../processed/dos_sim_p", i, "_pvalsDos.csv"), 
+              DataFrame(pvalsDos))
 	
     # Put together RawData object for S scores (condition-concentrations)
     SSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
                           XCVar=:Cond_Conc, ZCVar=:name,
                           XCType="noint", ZCType="noint", isYstd=true)
     # Run S scores (condition-concentrations)
-    srand(i)
+    Random.seed!(i)
     S, SPvals = S_score_perms(SSimData, nPerms)
     # Write to CSV
-    writecsv(string("../processed/dos_sim_p", i, "_S.csv"), S)
-    writecsv(string("../processed/dos_sim_p", i, "_SPvals.csv"), SPvals)
+    CSV.write(string("../processed/dos_sim_p", i, "_S.csv"), DataFrame(S))
+    CSV.write(string("../processed/dos_sim_p", i, "_SPvals.csv"), 
+              DataFrame(SPvals))
     
     # Put together RawData object for S scores (conditions only)
     SCondSimData = read_plate(X[[:Condition]], YSim, Z[[:name]]; 
                               XCVar=:Condition, ZCVar=:name,
                               XCType="noint", ZCType="noint", isYstd=true)
     # Run S scores (conditions only)
-    srand(i)
+    Random.seed!(i)
     SCond, SPvalsCond = S_score_perms(SCondSimData, nPerms)
     # Write to CSV
-    writecsv(string("../processed/dos_sim_p", i, "_SCond.csv"), SCond)
-    writecsv(string("../processed/dos_sim_p", i, "_SPvalsCond.csv"), SPvalsCond)
+    CSV.write(string("../processed/dos_sim_p", i, "_SCond.csv"), 
+              DataFrame(SCond))
+    CSV.write(string("../processed/dos_sim_p", i, "_SPvalsCond.csv"), 
+              DataFrame(SPvalsCond))
     
     # Write simulated interactions to CSV 
-    writecsv(string("../processed/dos_sim_p", i, "_interactions.csv"), 
-             interactions)
+    CSV.write(string("../processed/dos_sim_p", i, "_interactions.csv"), 
+              DataFrame(interactions))
     
 end
