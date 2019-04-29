@@ -65,6 +65,7 @@ mlmLabels = sapply(mlmAuxo, function(y){
 ###############################################################################
 
 # Read in Nichols auxotrophs (Supplemental Table 4)
+# https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3060659/bin/NIHMS261392-supplement-04.xls
 nicholsAuxo = read.csv("../data/NIHMS261392-supplement-04.csv", 
                        header=TRUE, skip=1)
 # Pull out names of Nichols auxotrophs
@@ -131,6 +132,7 @@ auc(nicholsFPR, nicholsTPR, type="spline")
 ###############################################################################
 
 # Read in Joyce auxotrophs (Supplemental Table 1)
+# http://systemsbiology.ucsd.edu/publications/supplemental_material/JBact2006/
 joyceAuxo = read.csv("../data/SupplementalDataResubmission_Tab1.csv", 
                      header=2, skip=1)
 # Pull out names of Joyce auxotrophs
@@ -195,6 +197,7 @@ auc(joyceFPR, joyceTPR, type="spline")
 ###############################################################################
 
 # Read in Kritikos S-scores (Supplemental Table 3)
+# https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5464397/bin/NIHMS72934-supplement-Supplementary_table_3.zip
 kritikosSscores = read.csv("../data/opacity.s.scores.csv")
 
 # Read in Kritikos Supplemental Table 2 to get conversion for gene names
