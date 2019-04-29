@@ -5,8 +5,7 @@ using Random
 using CSV
 
 # Matrix linear models for genetic screening data
-@everywhere include("../../mlm_packages/GeneticScreen/src/GeneticScreen.jl")
-@everywhere using Main.GeneticScreen
+@everywhere using GeneticScreen
 
 
 # Number of replicates
