@@ -13,7 +13,7 @@ Repository for storing supplemental code for ["Matrix linear models for high-thr
 
 ---
 
-- `Makefile`: Recipes for running each of the following components of the analysis; all data dependencies should be downloaded and placed in the `../data` directory prior to running any recipes
+- `Makefile`: Recipes for running each of the following components of the analysis in serial; all data dependencies should be downloaded and placed in the `../data` directory prior to running any recipes
 
 ---
 

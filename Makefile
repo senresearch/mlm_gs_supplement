@@ -1,32 +1,32 @@
 .PHONY: all compare_times dosage sim dosage_sim 
 
 all: 
-	preprocess.R
-	compare_times.jl
-	dosage.jl
-	auxotroph.R
-	dosage.R
-	sim.jl
-	sim.R
-	dosage_sim.jl
-	dosage_sim.R
+	R CMD BATCH preprocess.R
+	julia compare_times.jl
+	julia dosage.jl
+	R CMD BATCH auxotroph.R
+	R CMD BATCH dosage.R
+	julia sim.jl
+	R CMD BATCH sim.R
+	julia dosage_sim.jl
+	R CMD BATCH dosage_sim.R
 
 compare_times:
-	preprocess.R
+	R CMD BATCH preprocess.R
 	compare_times.jl
 
 dosage: 
-	preprocess.R
-	dosage.jl
-	auxotroph.R
-	dosage.R
+	R CMD BATCH preprocess.R
+	julia dosage.jl
+	R CMD BATCH auxotroph.R
+	R CMD BATCH dosage.R
 
 sim: 
-	preprocess.R
-	sim.jl
-	sim.R
+	R CMD BATCH preprocess.R
+	julia sim.jl
+	R CMD BATCH sim.R
 
 dosage_sim: 
-	preprocess.R
-	dosage_sim.jl
-	dosage_sim.R
+	R CMD BATCH preprocess.R
+	julia dosage_sim.jl
+	R CMD BATCH dosage_sim.R
