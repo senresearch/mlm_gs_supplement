@@ -14,7 +14,7 @@ Supplemental code for ["Matrix linear models for high-throughput chemical geneti
 ---
 
 - `code/Makefile`: Recipes for running each of the following components of the analysis in serial. All data dependencies should be downloaded and placed in the `data/` directory prior to running any recipes. 
-    - Julia dependencies: DataFrames](https://juliadata.github.io/DataFrames.jl/stable/), [CSV](https://github.com/JuliaData/CSV.jl), [Distributions](https://juliastats.github.io/Distributions.jl/stable/)
+    - Julia dependencies: [DataFrames](https://juliadata.github.io/DataFrames.jl/stable/), [CSV](https://github.com/JuliaData/CSV.jl), [Distributions](https://juliastats.github.io/Distributions.jl/stable/)
     - R dependencies: [data.table](https://cran.r-project.org/web/packages/data.table/index.html) [^fn4], [reshape2](https://cran.r-project.org/web/packages/reshape2/index.html) [^fn11], [MESS](https://cran.r-project.org/web/packages/MESS/index.html) [^fn5], [mutoss](https://cran.r-project.org/web/packages/mutoss/index.html) [^fn10] [^fn1]
 
 ---
@@ -29,7 +29,7 @@ Supplemental code for ["Matrix linear models for high-throughput chemical geneti
 ---
 
 - `code/dosage.jl`: Run matrix linear models (dosage-response and condition-concentrations) and Collins et al.'s S scores [^fn3] (condition-concentrations) on Nichols et al.'s data [^fn8]. 
-    - Dependencies: DataFrames](https://juliadata.github.io/DataFrames.jl/stable/), [CSV](https://github.com/JuliaData/CSV.jl)
+    - Dependencies: [DataFrames](https://juliadata.github.io/DataFrames.jl/stable/), [CSV](https://github.com/JuliaData/CSV.jl)
 
 - `auxotroph.R`: Reproduce plots to check for auxotrophs against the lists provided by Supplemental Table 4 in Nichols et al. [^fn8] and Supplemental Table 1 in Joyce et al. [^fn6], as well as analysis of Kritikos et al.'s S scores (Supplemental Table 3) [^fn7]. 
     - Dependencies: [reshape2](https://cran.r-project.org/web/packages/reshape2/index.html) [^fn11], [MESS](https://cran.r-project.org/web/packages/MESS/index.html) [^fn5]
@@ -40,7 +40,7 @@ Supplemental code for ["Matrix linear models for high-throughput chemical geneti
 ---
 
 - `code/sim.jl`: Run matrix linear models and Collins et al.'s S scores [^fn3] on simulated data. 
-    - Dependencies: DataFrames](https://juliadata.github.io/DataFrames.jl/stable/), [CSV](https://github.com/JuliaData/CSV.jl), [Distributions](https://juliastats.github.io/Distributions.jl/stable/)
+    - Dependencies: [DataFrames](https://juliadata.github.io/DataFrames.jl/stable/), [CSV](https://github.com/JuliaData/CSV.jl), [Distributions](https://juliastats.github.io/Distributions.jl/stable/)
 
 - `code/sim.R`: Reproduce ROC plots for comparing matrix linear models and Collins et al.'s S scores [^fn3]. 
     - Dependencies: [MESS](https://cran.r-project.org/web/packages/MESS/index.html) [^fn5], [mutoss](https://cran.r-project.org/web/packages/mutoss/index.html) [^fn10] [^fn1]
@@ -48,7 +48,7 @@ Supplemental code for ["Matrix linear models for high-throughput chemical geneti
 ---
 
 - `code/dosage_sim.jl`: Run matrix linear models (dosage-response) and Collins et al.'s S scores [^fn3] (condition-concentrations and conditions only) on simulated data. 
-    - Dependencies: DataFrames](https://juliadata.github.io/DataFrames.jl/stable/), [CSV](https://github.com/JuliaData/CSV.jl), [Distributions](https://juliastats.github.io/Distributions.jl/stable/)
+    - Dependencies: [DataFrames](https://juliadata.github.io/DataFrames.jl/stable/), [CSV](https://github.com/JuliaData/CSV.jl), [Distributions](https://juliastats.github.io/Distributions.jl/stable/)
 
 - `code/dosage_sim.R`: Reproduce ROC plots for comparing matrix linear models (dosage-response) and Collins et al.'s S scores [^fn3] (condition-concentrations and conditions only). 
     - Dependencies: [MESS](https://cran.r-project.org/web/packages/MESS/index.html) [^fn5], [mutoss](https://cran.r-project.org/web/packages/mutoss/index.html) [^fn10] [^fn1]
