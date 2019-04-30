@@ -13,35 +13,45 @@ Supplemental code for ["Matrix linear models for high-throughput chemical geneti
 
 ---
 
-- `code/Makefile`: Recipes for running each of the following components of the analysis in serial; all data dependencies should be downloaded and placed in the `data/` directory prior to running any recipes
+- `code/Makefile`: Recipes for running each of the following components of the analysis in serial. All data dependencies should be downloaded and placed in the `data/` directory prior to running any recipes. 
+    - Julia dependencies: DataFrames](https://juliadata.github.io/DataFrames.jl/stable/), [CSV](https://github.com/JuliaData/CSV.jl), [Distributions](https://juliastats.github.io/Distributions.jl/stable/)
+    - R dependencies: [data.table](https://cran.r-project.org/web/packages/data.table/index.html) [^fn4], [reshape2](https://cran.r-project.org/web/packages/reshape2/index.html) [^fn11], [MESS](https://cran.r-project.org/web/packages/MESS/index.html) [^fn5], [mutoss](https://cran.r-project.org/web/packages/mutoss/index.html) [^fn10] [^fn1]
 
 ---
 
-- `code/preprocess.R` [^fn4]: Preprocess Nichols et al.'s data [^fn8]; requires data contained in `data/raw_KEIO_data/` and should be run before any of the other files
+- `code/preprocess.R`: Preprocess Nichols et al.'s data [^fn8]. Requires data contained in `data/raw_KEIO_data/` and should be run before any of the other files. 
+    - Dependencies: [data.table](https://cran.r-project.org/web/packages/data.table/index.html) [^fn4]
 
 ---
 
-- `code/compare_times.jl`: Compare the runtimes for matrix linear models and Collins et al.'s S scores [^fn3]
+- `code/compare_times.jl`: Compare the runtimes for matrix linear models and Collins et al.'s S scores [^fn3]. 
+    - Dependencies: [DataFrames](https://juliadata.github.io/DataFrames.jl/stable/), [CSV](https://github.com/JuliaData/CSV.jl)
+---
+
+- `code/dosage.jl`: Run matrix linear models (dosage-response and condition-concentrations) and Collins et al.'s S scores [^fn3] (condition-concentrations) on Nichols et al.'s data [^fn8]. 
+    - Dependencies: DataFrames](https://juliadata.github.io/DataFrames.jl/stable/), [CSV](https://github.com/JuliaData/CSV.jl)
+
+- `auxotroph.R`: Reproduce plots to check for auxotrophs against the lists provided by Supplemental Table 4 in Nichols et al. [^fn8] and Supplemental Table 1 in Joyce et al. [^fn6], as well as analysis of Kritikos et al.'s S scores (Supplemental Table 3) [^fn7]. 
+    - Dependencies: [reshape2](https://cran.r-project.org/web/packages/reshape2/index.html) [^fn11], [MESS](https://cran.r-project.org/web/packages/MESS/index.html) [^fn5]
+
+- `code/dosage.R`: Reproduce plots of proportion of hits detected by dosage response approach compared to matrix linear models and Collins et al.'s S scores [^fn3]. 
+    - Dependencies: [mutoss](https://cran.r-project.org/web/packages/mutoss/index.html) [^fn10] [^fn1]
 
 ---
 
-- `code/dosage.jl`: Run matrix linear models (dosage-response and condition-concentrations) and Collins et al.'s S scores [^fn3] (condition-concentrations) on Nichols et al.'s data [^fn8]
+- `code/sim.jl`: Run matrix linear models and Collins et al.'s S scores [^fn3] on simulated data. 
+    - Dependencies: DataFrames](https://juliadata.github.io/DataFrames.jl/stable/), [CSV](https://github.com/JuliaData/CSV.jl), [Distributions](https://juliastats.github.io/Distributions.jl/stable/)
 
-- `auxotroph.R` [^fn11] [^fn5]: Reproduce plots to check for auxotrophs against the lists provided by Supplemental Table 4 in Nichols et al. [^fn8] and Supplemental Table 1 in Joyce et al. [^fn6], as well as analysis of Kritikos et al.'s S scores (Supplemental Table 3) [^fn7]
-
-- `code/dosage.R` [^fn10] [^fn1]: Reproduce plots of proportion of hits detected by dosage response approach compared to matrix linear models and Collins et al.'s S scores [^fn3]
-
----
-
-- `code/sim.jl`: Run matrix linear models and Collins et al.'s S scores [^fn3] on simulated data
-
-- `code/sim.R` [^fn10] [^fn1] [^fn5]: Reproduce ROC plots for comparing matrix linear models and Collins et al.'s S scores [^fn3]
+- `code/sim.R`: Reproduce ROC plots for comparing matrix linear models and Collins et al.'s S scores [^fn3]. 
+    - Dependencies: [MESS](https://cran.r-project.org/web/packages/MESS/index.html) [^fn5], [mutoss](https://cran.r-project.org/web/packages/mutoss/index.html) [^fn10] [^fn1]
 
 ---
 
-- `code/dosage_sim.jl`: Run matrix linear models (dosage-response) and Collins et al.'s S scores [^fn3] (condition-concentrations and conditions only) on simulated data
+- `code/dosage_sim.jl`: Run matrix linear models (dosage-response) and Collins et al.'s S scores [^fn3] (condition-concentrations and conditions only) on simulated data. 
+    - Dependencies: DataFrames](https://juliadata.github.io/DataFrames.jl/stable/), [CSV](https://github.com/JuliaData/CSV.jl), [Distributions](https://juliastats.github.io/Distributions.jl/stable/)
 
-- `code/dosage_sim.R` [^fn10] [^fn1] [^fn5]: Reproduce ROC plots for comparing matrix linear models (dosage-response) and Collins et al.'s S scores [^fn3] (condition-concentrations and conditions only)
+- `code/dosage_sim.R`: Reproduce ROC plots for comparing matrix linear models (dosage-response) and Collins et al.'s S scores [^fn3] (condition-concentrations and conditions only). 
+    - Dependencies: [MESS](https://cran.r-project.org/web/packages/MESS/index.html) [^fn5], [mutoss](https://cran.r-project.org/web/packages/mutoss/index.html) [^fn10] [^fn1]
 
 
 [^fn1]: Benjamini, Y. and Hochberg, Y. (2000). On the adaptive control of the false discovery rate in multiple testing with independent statistics. *Journal of educational and Behavioral Statistics*, 25(1):60–83.
