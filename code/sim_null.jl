@@ -168,9 +168,9 @@ end
 
 
 # Number of permutations 
-nPerms = 4 #1000
+nPerms = 1000
 # Number of simulations
-nSim = 2 #100
+nSim = 100
 
 # FPR cutoffs
 cutoffs = [0.01, 0.05, 0.1] 
