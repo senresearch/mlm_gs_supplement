@@ -1,5 +1,6 @@
 using Distributed
 using DataFrames
+using Statistics
 using Distributions
 using Random
 using CSV
@@ -167,7 +168,15 @@ end
 
 
 # Number of permutations 
-nPerms = 1000
+nPerms = 4 #1000
+# Number of simulations
+nSim = 2 #100
+
+# FPR cutoffs
+cutoffs = [0.01, 0.05, 0.1] 
+# Arrays for storing FPRs (proportion below cutoffs) and standard errors
+fpr = Array{Float64}(undef, 6, length(cutoffs))
+fprSd = Array{Float64}(undef, 6, length(cutoffs))
 
 # Iterate through the six plates
 for i in 1:6
@@ -185,40 +194,48 @@ for i in 1:6
     Z = CSV.read(string("../data/raw_KEIO_data/KEIO", i, 
                         "_KEY.csv"), delim='\t', header=true) 
     
-    # Simulate interactions and response matrix
-    Random.seed!(10+i)
-	  interactions, YSim = sim_data(X[[:Cond_Conc]], Z[[:name]], 
-                                  :Cond_Conc, :name)
+    # Array for storing proportion of p-values below cutoffs
+    propPvals = Array{Float64}(undef, nSim, length(cutoffs))
+
+    for k in 1:nSim
+
+        # Simulate interactions and response matrix
+        Random.seed!(nSim*i+k+10)
+	      interactions, YSim = sim_data(X[[:Cond_Conc]], Z[[:name]], 
+                                      :Cond_Conc, :name)
+        
+        # Put together RawData object for matrix linear models
+        MLMSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
+                                XCVar=:Cond_Conc, ZCVar=:name,
+                                XCType="sum", ZCType="sum", isYstd=true)
+        # Shuffle the rows of Y
+        MLMSimData.response.Y[:,:] = shuffle_rows(get_Y(MLMSimData))
+        
+        # Run matrix linear models
+        Random.seed!(i)
+        tStats, pvals = mlm_backest_sum_perms(MLMSimData, nPerms)
+        
+        # Find proportion of p-values below each cutoff
+        for j in 1:length(cutoffs) 
+            propPvals[k,j] = mean(pvals .< cutoffs[j]) 
+        end 
+    end
     
-    # Put together RawData object for matrix linear models
-    MLMSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
-                            XCVar=:Cond_Conc, ZCVar=:name,
-                            XCType="sum", ZCType="sum", isYstd=true)
+    # Compute mean and standard deviation of p-value proportions
+    for j in 1:length(cutoffs) 
+        fpr[i,:] = Statistics.mean(propPvals, dims=1) 
+        fprSd[i,:] = Statistics.std(propPvals, dims=1) 
+    end
     
-    # Put together RawData object for S scores
-    SSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
-                          XCVar=:Cond_Conc, ZCVar=:name,
-                          XCType="noint", ZCType="noint", isYstd=true)
-    
-    # Run matrix linear models
-    Random.seed!(i)
-    tStats, pvals = mlm_backest_sum_perms(MLMSimData, nPerms)
-    # Write to CSV
-    CSV.write(string("../processed/sim_p", i, "_tStats.csv"), 
-                      DataFrame(tStats), writeheader=false)
-    CSV.write(string("../processed/sim_p", i, "_pvals.csv"), 
-                      DataFrame(pvals), writeheader=false)
-    
-    # Run S scores
-    Random.seed!(i)
-    S, SPvals = S_score_perms(SSimData, nPerms)
-    # Write to CSV
-    CSV.write(string("../processed/sim_p", i, "_S.csv"), DataFrame(S))
-    CSV.write(string("../processed/sim_p", i, "_SPvals.csv"), 
-              DataFrame(SPvals), writeheader=false)
-    
-    # Write simulated interactions to CSV 
-    CSV.write(string("../processed/sim_p", i, "_interactions.csv"), 
-              DataFrame(interactions), writeheader=false)
-    
+    # Write proportions of p-values below cutoffs to CSV
+    CSV.write(string("../processed/sim_null_p", i, "_propPvals.csv"), 
+              DataFrame(propPvals), writeheader=false)
 end
+
+# Write mean proportions and standard errors to CSV
+CSV.write(string("../processed/sim_null_fpr.csv"), 
+          DataFrame(vcat(["plate" transpose(cutoffs)], 
+                    hcat(["1", "2", "3", "4", "5", "6"], fpr))), writeheader=false)
+CSV.write(string("../processed/sim_null_fprSd.csv"), 
+          DataFrame(vcat(["plate" transpose(cutoffs)], 
+                    hcat(["1", "2", "3", "4", "5", "6"], fprSd))), writeheader=false)

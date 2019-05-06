@@ -45,6 +45,9 @@ Supplemental code for ["Matrix linear models for high-throughput chemical geneti
 - `code/sim.R`: Reproduce ROC plots for comparing matrix linear models and Collins et al.'s S scores [^fn3]. 
     - Dependencies: [MESS](https://cran.r-project.org/web/packages/MESS/index.html) [^fn5], [mutoss](https://cran.r-project.org/web/packages/mutoss/index.html) [^fn10] [^fn1]
 
+- `code/sim_null.jl`: Permute simulated data to calculate Type I error for matrix linear models. 
+    - Dependencies: [DataFrames](https://juliadata.github.io/DataFrames.jl/stable/), [CSV](https://github.com/JuliaData/CSV.jl), [Distributions](https://juliastats.github.io/Distributions.jl/stable/)
+
 ---
 
 - `code/dosage_sim.jl`: Run matrix linear models (dosage-response) and Collins et al.'s S scores [^fn3] (condition-concentrations and conditions only) on simulated data. 

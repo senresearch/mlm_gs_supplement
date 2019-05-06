@@ -106,7 +106,7 @@ for (i in 1:6) {
                         "_krit_dat.csv"), row.names=FALSE)
   
   # Condition-concentration names
-  write.table(kritCond_conc_names[[i]], 
+  write.table(kritCondConcNames[[i]], 
               file=paste0("../processed/processed_KEIO_data/p", i, 
                           "_krit_cond_conc_names.csv"), 
               sep=",", row.names=FALSE, col.names=FALSE)

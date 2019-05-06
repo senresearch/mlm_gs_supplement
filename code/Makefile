@@ -8,6 +8,7 @@ all:
 	R CMD BATCH dosage.R
 	julia sim.jl
 	R CMD BATCH sim.R
+	julia sim_null.jl
 	julia dosage_sim.jl
 	R CMD BATCH dosage_sim.R
 

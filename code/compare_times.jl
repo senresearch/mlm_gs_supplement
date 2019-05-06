@@ -33,7 +33,7 @@ for i in 1:6
                         "_krit_cond.csv"), delim=',', header=true) 
     
     # Mutant keys
-    Z = CSV.read(string("../processed/raw_KEIO_data/KEIO", i, 
+    Z = CSV.read(string("../data/raw_KEIO_data/KEIO", i, 
                         "_KEY.csv"), delim='\t', header=true) 
     
     # Put together RawData object for matrix linear models 
