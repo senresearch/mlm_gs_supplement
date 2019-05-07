@@ -4,7 +4,7 @@ Supplemental code for ["Matrix linear models for high-throughput chemical geneti
 
 - Julia functions used to run matrix linear models for genetic screening data are provided in the [GeneticScreen](https://github.com/janewliang/GeneticScreen.jl) package, which is an extension of the [matrixLM](https://github.com/janewliang/matrixLM.jl) package. 
 
-- Genetic screening data from Nichols et al. [^fn8] used for analysis is available upon request. Once downloaded, it should be saved in the `data/raw_KEIO_data/` directory. 
+- Genetic screening data from Nichols et al. [^fn8] used for analysis is available [here](https://www.dropbox.com/sh/jbsan7qtujjeh6p/AAAdUBPnc6JsVN7VaSY3c7A1a?dl=0). Once downloaded, it should be saved in the `data/raw_KEIO_data/` directory. 
 
 - Running `auxotroph.R` additionally requires downloading the following tables and saving them as CSVs in the `data/` directory. 
     - [Supplemental Table 4](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3060659/bin/NIHMS261392-supplement-04.xls) in Nichols et al. [^fn8]
