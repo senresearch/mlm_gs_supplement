@@ -89,17 +89,18 @@ mean(do.call(c, sapply(nicholsAuxoMin, function(x){
 nicholsAuxoMinDf = melt(nicholsAuxoMin)
 names(nicholsAuxoMinDf) = c("Cond_Conc", "Mutant", "tStat", "Plate")
 
-png("../pictures/nichols_auxo_dot.png", 480, 320)
+jpeg("../pictures/nichols_auxo_dot.jpg", 
+     width=15, height=10, units="cm", res=300)
 par(mar=c(4.1,4.1,1.1,1.1))
 
 # Dot plot of t-statistics corresponding to Nichols auxotrophs
 plot(tStat~as.numeric(Mutant), nicholsAuxoMinDf, 
-     xaxt="n", pch=16, cex=0.6, 
-    xlab="Auxotroph Mutants", ylab="MLM Interaction Scores")
+    xlab="Auxotroph Mutants", ylab="MLM Interaction Scores", 
+    xaxt="n", pch=16, cex=0.6)
 # Draw horizontal bars at medians
 points(unique(as.numeric(nicholsAuxoMinDf$Mutant)), 
        tapply(nicholsAuxoMinDf$tStat, nicholsAuxoMinDf$Mutant, median), 
-       pch="-", cex=3)
+       pch="-", cex=2.5)
 # Horizontal reference line at 0
 abline(h=0, col="grey")
 dev.off()
@@ -115,13 +116,15 @@ nicholsTPR = apply(mlmLabels, 2, function(x){
 nicholsFPR = apply(mlmLabels, 2, function(x){
   1 - sum(x==nicholsLabels & x==FALSE)/sum(nicholsLabels==FALSE)})
 
-png("../pictures/nichols_auxo_ROC.png", 380, 380)
+jpeg("../pictures/nichols_auxo_ROC.jpg", 
+     width=10, height=10, units="cm", res=300)
 par(mar=c(4.1,4.1,1.1,1.1))
 
 # ROC curve
 plot(nicholsFPR, nicholsTPR,
      xlab="False Positive Rate", ylab="True Positive Rate", 
-     xaxs="i", yaxs="i", type="l")
+     xaxs="i", yaxs="i", type="l", 
+     cex.lab=0.8, cex.axis=0.8, cex.main=0.8)
 # Reference line
 abline(0, 1, col="grey")
 dev.off()
@@ -154,17 +157,18 @@ mean(do.call(c, sapply(joyceAuxoMin, function(x){
 joyceAuxoMinDf = melt(joyceAuxoMin)
 names(joyceAuxoMinDf) = c("Cond_Conc", "Mutant", "tStat", "Plate")
 
-png("../pictures/joyce_auxo_dot.png", 480, 320)
+jpeg("../pictures/joyce_auxo_dot.jpg", 
+     width=15, height=10, units="cm", res=300)
 par(mar=c(4.1,4.1,1.1,1.1))
 
 # Dot plot of t-statistics corresponding to Joyce auxotrophs
 plot(tStat~as.numeric(as.factor(Mutant)), joyceAuxoMinDf, 
-     xaxt="n", pch=16, cex=0.6, 
-     xlab="Auxotroph Mutants", ylab="MLM Interaction Scores")
+     xlab="Auxotroph Mutants", ylab="MLM Interaction Scores", 
+     xaxt="n", pch=16, cex=0.6)
 # Draw horizontal bars at medians
 points(sort(unique(as.numeric(as.factor(joyceAuxoMinDf$Mutant)))), 
        tapply(joyceAuxoMinDf$tStat, as.factor(joyceAuxoMinDf$Mutant), median), 
-       pch="-", cex=3)
+       pch="-", cex=2.5)
 # Horizontal reference line at 0
 abline(h=0, col="grey")
 dev.off()
@@ -180,13 +184,15 @@ joyceTPR = apply(mlmLabels, 2, function(x){
 joyceFPR = apply(mlmLabels, 2, function(x){
   1 - sum(x==joyceLabels & x==FALSE)/sum(joyceLabels==FALSE)})
 
-png("../pictures/joyce_auxo_ROC.png", 380, 380)
+jpeg("../pictures/joyce_auxo_ROC.jpg", 
+     width=10, height=10, units="cm", res=300)
 par(mar=c(4.1,4.1,1.1,1.1))
 
 # ROC curve
 plot(joyceFPR, joyceTPR, 
      xlab="False Positive Rate", ylab="True Positive Rate", 
-     xaxs="i", yaxs="i", type="l")
+     xaxs="i", yaxs="i", type="l", 
+     cex.lab=0.8, cex.axis=0.8, cex.main=0.8)
 # Reference line
 abline(0, 1, col="grey")
 dev.off()

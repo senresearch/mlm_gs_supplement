@@ -167,14 +167,16 @@ fpr = lapply(1:6, function(i) {
 myCols = c("firebrick3", "dodgerblue3", "forestgreen", "black", "snow4")
 myLines = c("solid", "dashed", "dotdash", "dotted", "dotted")
 
-png("../pictures/dos_sim_p%01d_ROC.png", width=380, height=380)
+jpeg("../pictures/dos_sim_p%01d_ROC.jpg", 
+     width=10, height=10, units="cm", res=300)
 par(mar=c(4.1,4.1,2.1,2.1))
 
 AUCs = sapply(1:6, function(i) {
   # ROC curve for dosage-response (MLM)
   plot(c(0, fpr[[i]][,1]), c(0, tpr[[i]][,1]), col=myCols[1], lty=myLines[1], 
        xlab="False Positive Rate", ylab="True Positive Rate", 
-       main=paste("Plate", i), xaxs="i", yaxs="i", type="l")
+       main=paste("Plate", i), xaxs="i", yaxs="i", type="l", 
+       cex.lab=0.8, cex.axis=0.8, cex.main=0.8)
   # ROC curve for condition-concentrations
   lines(c(0, fpr[[i]][,2]), c(0, tpr[[i]][,2]), col=myCols[2], lty=myLines[2])
   # ROC curve for conditions only
@@ -189,7 +191,7 @@ AUCs = sapply(1:6, function(i) {
   # Legend for different methods
   legend(0.4, 0.375, c("MLM Dos. Resp.", "Cond.-Conc.", "Conditions", 
                        "1/3 Hits", "2/3 Hits"), 
-         col=myCols, lty=myLines, bty="n")
+         col=myCols, lty=myLines, bty="n", cex=0.8)
   
   # Return AUCs
   return(sapply(1:5, function(j){auc(c(0, fpr[[i]][,j]), c(0, tpr[[i]][,j]))}))
@@ -199,3 +201,7 @@ dev.off()
 rownames(AUCs) = c("MLM Dos. Resp.", "Cond.-Conc.", "Conditions", 
                    "1/3 Hits", "2/3 Hits") 
 colnames(AUCs) = paste("Plate", 1:6)
+
+
+# Write supplemental table 1
+write.csv(round(AUCs, 3), file="../processed/Table S1.csv")

@@ -53,7 +53,8 @@ propHits = lapply(1:6, function(i) {
 myCols = c("black", "dodgerblue3", "firebrick3")
 myLines = c("solid", "dashed", "solid")
 
-png("../pictures/dos_p%01d_prop_hits.png", width=380, height=380)
+jpeg("../pictures/dos_p%01d_prop_hits.jpg", 
+     width=10, height=10, units="cm", res=300)
 par(mar=c(4.1,4.1,2.1,2.1))
 
 invisible(sapply(1:6, function(i) {
@@ -61,15 +62,16 @@ invisible(sapply(1:6, function(i) {
   plot(FDRs, propHits[[i]][,1], type="l", col=myCols[3], lty=myLines[3], 
        xlab="Adjusted p-value Cutoffs", 
        ylab="Prop. of Significant Interactions", 
-       main=paste("Plate", i))
+       main=paste("Plate", i), 
+       cex.lab=0.8, cex.axis=0.8, cex.main=0.8)
   # Proportion of hits for MLM
   lines(FDRs, propHits[[i]][,2], col=myCols[1], lty=myLines[1])
   # Proportion of hits for S scores
   lines(FDRs, propHits[[i]][,3], col=myCols[2], lty=myLines[2])
   
   # Legend for different methods
-  legend(0.475, 0.275,
+  legend(0.4, 0.275,
          c( "MLM", "S scores","Dos. Resp. MLM"), 
-         col=myCols, lty=myLines, bty="n")
+         col=myCols, lty=myLines, bty="n", cex=0.8)
 }))
 dev.off()

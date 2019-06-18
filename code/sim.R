@@ -71,14 +71,16 @@ SFPR = lapply(1:6, function(i){
 })
 
 
-png("../pictures/sim_p%01d_ROC.png", 380, 380)
+jpeg("../pictures/sim_p%01d_ROC.jpg", 
+     width=10, height=10, units="cm", res=300)
 par(mar=c(4.1,4.1,2.1,2.1))
 
 AUCs = sapply(1:6, function(i) {
   # ROC curve for MLM
   plot(c(0, mlmFPR[[i]]), c(0, mlmTPR[[i]]), 
        xlab="False Positive Rate", ylab="True Positive Rate", 
-       main=paste("Plate", i), xaxs="i", yaxs="i", type="l")
+       main=paste("Plate", i), xaxs="i", yaxs="i", type="l", 
+       cex.lab=0.7, cex.axis=0.7, cex.main=0.7)
   # ROC curve for S scores
   lines(c(0, SFPR[[i]]), c(0, STPR[[i]]), 
         type="l", col="dodgerblue3", lty="dashed")
@@ -87,7 +89,8 @@ AUCs = sapply(1:6, function(i) {
   abline(0, 1, col="grey")
   # Legend for different methods
   legend(0.6, 0.3, c("MLM", "S scores"), 
-         col=c("black", "dodgerblue3"), lty=c("solid", "dashed"), bty="n")
+         col=c("black", "dodgerblue3"), lty=c("solid", "dashed"), 
+         bty="n", cex=0.7)
   
   # Return AUCs
   return(c(auc(c(0, mlmFPR[[i]]), c(0, mlmTPR[[i]]), type="spline"),
