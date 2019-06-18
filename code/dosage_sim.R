@@ -204,4 +204,7 @@ colnames(AUCs) = paste("Plate", 1:6)
 
 
 # Write supplemental table 1
-write.csv(round(AUCs, 3), file="../processed/Table S1.csv")
+con <- file("../processed/Table S1.txt", open="wt") 
+writeLines("# Table S1: AUCs for dosage-response simulation based on plates 2-5. Dosage-response encoded matrix linear models outperform all other methods shown within each plate. These include S scores for data encoded with categorical condition-dosage combinations, for any of the three representations (Cond.-Conc, 1/3 Hits, and 2/3 Hits), as well as S scores for data encoded with just the conditions.", con) 
+write.table(round(AUCs, 3), file=con) 
+close(con) 
