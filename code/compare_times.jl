@@ -1,6 +1,7 @@
 using Distributed
 using DataFrames
 using Statistics
+import Statistics.mean
 using Random
 using CSV
 
@@ -73,12 +74,12 @@ mlmTimes = mlmTimes[:,2:end]
 # Total time
 mlmTimes = vcat(mlmTimes, sum(mlmTimes, dims=1))
 # Print mean
-println(Statistics.mean(mlmTimes, dims=2))
+println(mean(mlmTimes, dims=2))
 # Write times to CSV
 CSV.write("../processed/mlm_times.csv",  
           DataFrame(vcat(["plate" "mean" transpose(collect(1:reps))], 
                          hcat(["1", "2", "3", "4", "5", "6", "Total"], 
-                              Statistics.mean(mlmTimes, dims=2), mlmTimes))), 
+                              mean(mlmTimes, dims=2), mlmTimes))), 
           writeheader=false)
 
 # S scores
@@ -87,12 +88,12 @@ STimes = STimes[:,2:end]
 # Total time
 STimes = vcat(STimes, sum(STimes, dims=1))
 # Print mean
-println(Statistics.mean(STimes, dims=2))
+println(mean(STimes, dims=2))
 # Write times to CSV
 CSV.write("../processed/S_times.csv",  
           DataFrame(vcat(["plate" "mean" transpose(collect(1:reps))], 
                          hcat(["1", "2", "3", "4", "5", "6", "Total"], 
-                              Statistics.mean(STimes, dims=2), STimes))), 
+                              mean(STimes, dims=2), STimes))), 
           writeheader=false)
 
 # Matrix linear model permutations
@@ -101,23 +102,24 @@ mlmPermTimes = mlmPermTimes[:,2:end]
 # Total time
 mlmPermTimes = vcat(mlmPermTimes, sum(mlmPermTimes, dims=1))
 # Print mean
-println(Statistics.mean(mlmPermTimes, dims=2))
+println(mean(mlmPermTimes, dims=2))
 # Write times to CSV
 CSV.write("../processed/mlm_perm_times.csv",  
           DataFrame(vcat(["plate" "mean" transpose(collect(1:reps))], 
                          hcat(["1", "2", "3", "4", "5", "6", "Total"], 
-                              Statistics.mean(mlmPermTimes, dims=2), 
-                              mlmPermTimes))), writeheader=false)
+                              mean(mlmPermTimes, dims=2), mlmPermTimes))), 
+          writeheader=false)
+
 # S score permutations
 # Drop the dry run
 SPermTimes = SPermTimes[:,2:end]
 # Total time
 SPermTimes = vcat(SPermTimes, sum(SPermTimes, dims=1))
 # Print mean
-println(Statistics.mean(SPermTimes, dims=2))
+println(mean(SPermTimes, dims=2))
 # Write times to CSV
 CSV.write("../processed/S_perm_times.csv",  
           DataFrame(vcat(["plate" "mean" transpose(collect(1:reps))], 
                          hcat(["1", "2", "3", "4", "5", "6", "Total"], 
-                              Statistics.mean(SPermTimes, dims=2), 
-                              SPermTimes))), writeheader=false)
+                              mean(SPermTimes, dims=2), SPermTimes))), 
+          writeheader=false)
