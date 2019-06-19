@@ -80,7 +80,7 @@ AUCs = sapply(1:6, function(i) {
   plot(c(0, mlmFPR[[i]]), c(0, mlmTPR[[i]]), 
        xlab="False Positive Rate", ylab="True Positive Rate", 
        main=paste("Plate", i), xaxs="i", yaxs="i", type="l", 
-       cex.lab=0.7, cex.axis=0.7, cex.main=0.7)
+       cex.lab=0.8, cex.axis=0.8, cex.main=0.8)
   # ROC curve for S scores
   lines(c(0, SFPR[[i]]), c(0, STPR[[i]]), 
         type="l", col="dodgerblue3", lty="dashed")
@@ -90,7 +90,7 @@ AUCs = sapply(1:6, function(i) {
   # Legend for different methods
   legend(0.6, 0.3, c("MLM", "S scores"), 
          col=c("black", "dodgerblue3"), lty=c("solid", "dashed"), 
-         bty="n", cex=0.7)
+         bty="n", cex=0.8)
   
   # Return AUCs
   return(c(auc(c(0, mlmFPR[[i]]), c(0, mlmTPR[[i]]), type="spline"),
