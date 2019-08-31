@@ -1,4 +1,4 @@
-Supplemental code for ["Matrix linear models for high-throughput chemical genetic screens"](https://www.biorxiv.org/content/10.1101/468140v1).
+Supplemental code for ["Matrix linear models for high-throughput chemical genetic screens"](http://dx.doi.org/10.1534/genetics.119.302299).
 
 - Implemented in [Julia](https://julialang.org/downloads/) [^fn2] and [R](https://cran.r-project.org/mirrors.html) [^fn9]. 
 
