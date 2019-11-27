@@ -178,11 +178,12 @@ for i in 1:6
     
     # Simulate interactions, conditions and concentrations, and response matrix
     Random.seed!(10+i)
-    interactions, X, YSim = sim_dos_data(p, levs, reps, Z[[:name]], :name)
+    interactions, X, YSim = sim_dos_data(p, levs, reps, Z[:,[:name]], :name)
+    
     
     # Put together RawData object for matrix linear models (dosage-response)
-    MLMDosSimData = read_plate(X[[:Condition, :Concentration]], YSim, 
-                               Z[[:name]]; ZCVar=:name, ZCType="sum", 
+    MLMDosSimData = read_plate(X[:,[:Condition, :Concentration]], YSim, 
+                               Z[:,[:name]]; ZCVar=:name, ZCType="sum", 
                                isXDos=true, XConditionVar=:Condition, 
                                XConcentrationVar=:Concentration, isYstd=true)
     # Run matrix linear models (dosage-response)
@@ -195,9 +196,10 @@ for i in 1:6
               DataFrame(tStatsDos), writeheader=false)
     CSV.write(string("../processed/dos_sim_p", i, "_pvalsDos.csv"), 
               DataFrame(pvalsDos), writeheader=false)
-	
+    
+
     # Put together RawData object for S scores (condition-concentrations)
-    SSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
+    SSimData = read_plate(X[:,[:Cond_Conc]], YSim, Z[:,[:name]]; 
                           XCVar=:Cond_Conc, ZCVar=:name,
                           XCType="noint", ZCType="noint", isYstd=true)
     # Run S scores (condition-concentrations)
@@ -209,8 +211,9 @@ for i in 1:6
     CSV.write(string("../processed/dos_sim_p", i, "_SPvals.csv"), 
               DataFrame(SPvals), writeheader=false)
     
+
     # Put together RawData object for S scores (conditions only)
-    SCondSimData = read_plate(X[[:Condition]], YSim, Z[[:name]]; 
+    SCondSimData = read_plate(X[:,[:Condition]], YSim, Z[:,[:name]]; 
                               XCVar=:Condition, ZCVar=:name,
                               XCType="noint", ZCType="noint", isYstd=true)
     # Run S scores (conditions only)
@@ -221,6 +224,7 @@ for i in 1:6
               DataFrame(SCond), writeheader=false)
     CSV.write(string("../processed/dos_sim_p", i, "_SPvalsCond.csv"), 
               DataFrame(SPvalsCond), writeheader=false)
+    
     
     # Write simulated interactions to CSV 
     CSV.write(string("../processed/dos_sim_p", i, "_interactions.csv"), 

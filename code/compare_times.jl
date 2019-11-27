@@ -1,6 +1,5 @@
 using Distributed
 using DataFrames
-using Statistics
 import Statistics.mean
 using Random
 using CSV
@@ -38,12 +37,12 @@ for i in 1:6
                         "_KEY.csv"), delim='\t', header=true) 
     
     # Put together RawData object for matrix linear models 
-    MLMData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
+    MLMData = read_plate(X[:,[:Cond_Conc]], Y, Z[:,[:name]]; 
     	        	     XCVar=:Cond_Conc, ZCVar=:name,
     	        	     isYstd=true, XCType="sum", ZCType="sum")
     
     # Put together RawData object for S scores
-    SData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
+    SData = read_plate(X[:,[:Cond_Conc]], Y, Z[:,[:name]]; 
     	        	   XCVar=:Cond_Conc, ZCVar=:name,
     	        	   isYstd=true, XCType="noint", ZCType="noint")
     

@@ -30,9 +30,9 @@ DataFrame
 function get_XDos(X, conditionVar, concentrationVar)
 
     # Pull out every condition 
-    allConds = unique(X[conditionVar])
+    allConds = unique(X[:,conditionVar])
     # For each condition, pull out all of the concentrations
-    concs = [X[concentrationVar][cond .== X[conditionVar]] 
+    concs = [X[:,concentrationVar][cond .== X[:,conditionVar]] 
              for cond in allConds]
     # Get the number of unique concentration levels found for each condition
     numLevels = [length(unique(conc)) for conc in concs]
@@ -47,8 +47,8 @@ function get_XDos(X, conditionVar, concentrationVar)
         if numLevels[i] == 1
             # If there is only one concentration level, there are no true 
             # slopes; set all levels to 1. 
-            XDos[(X[conditionVar] .== allConds[i]) .& 
-                 (X[concentrationVar] .== unique(concs[i])[1]), i] .= 1
+            XDos[(X[:,conditionVar] .== allConds[i]) .& 
+                 (X[:,concentrationVar] .== unique(concs[i])[1]), i] .= 1
         else 
             # For every condition, split the concentration levels on 
             # "sec", "%", and spaces. 
@@ -97,8 +97,8 @@ function get_XDos(X, conditionVar, concentrationVar)
             
             # Assign slopes for each condition. 
             for j in 1:length(unique(concs[i]))
-                XDos[(X[conditionVar] .== allConds[i]) .& 
-                     (X[concentrationVar] .== unique(concs[i])[idx][j]), i] .= j
+                XDos[(X[:,conditionVar] .== allConds[i]) .& 
+                     (X[:,concentrationVar] .== unique(concs[i])[idx][j]), i] .= j
             end
         end
     end
@@ -129,7 +129,7 @@ for i in 1:6
     # Dosage slopes
     XDos = get_XDos(X, :Condition, :Concentration)
     # Put together RawData object for matrix linear models (dosage-response)
-    MLMDosData = read_plate(XDos, Y, Z[[:name]]; 
+    MLMDosData = read_plate(XDos, Y, Z[:,[:name]]; 
                             ZCVar=:name, ZCType="sum", isYstd=true)
     # Run matrix linear models (dosage-response)
     Random.seed!(i)
@@ -142,8 +142,9 @@ for i in 1:6
     CSV.write(string("../processed/p", i, "_pvalsDos.csv"), 
               DataFrame(pvalsDos), writeheader=false)
     
+
     # Put together RawData object for matrix linear models 
-    MLMData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
+    MLMData = read_plate(X[:,[:Cond_Conc]], Y, Z[:,[:name]]; 
                             XCVar=:Cond_Conc, ZCVar=:name,
                             XCType="sum", ZCType="sum", isYstd=true)
     # Run matrix linear models
@@ -155,8 +156,9 @@ for i in 1:6
     CSV.write(string("../processed/p", i, "_pvals.csv"), 
               DataFrame(pvals), writeheader=false)
     
+
     # Put together RawData object for S scores
-    SData = read_plate(X[[:Cond_Conc]], Y, Z[[:name]]; 
+    SData = read_plate(X[:,[:Cond_Conc]], Y, Z[:,[:name]]; 
                           XCVar=:Cond_Conc, ZCVar=:name,
                           XCType="noint", ZCType="noint", isYstd=true)
     # Run S scores

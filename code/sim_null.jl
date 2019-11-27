@@ -1,6 +1,6 @@
 using Distributed
 using DataFrames
-using Statistics
+import Statistics.mean, Statistics.std
 using Distributions
 using Random
 using CSV
@@ -201,11 +201,11 @@ for i in 1:6
 
         # Simulate interactions and response matrix
         Random.seed!(nSim*i+k+10)
-	      interactions, YSim = sim_data(X[[:Cond_Conc]], Z[[:name]], 
+	      interactions, YSim = sim_data(X[:,[:Cond_Conc]], Z[:,[:name]], 
                                       :Cond_Conc, :name)
         
         # Put together RawData object for matrix linear models
-        MLMSimData = read_plate(X[[:Cond_Conc]], YSim, Z[[:name]]; 
+        MLMSimData = read_plate(X[:,[:Cond_Conc]], YSim, Z[:,[:name]]; 
                                 XCVar=:Cond_Conc, ZCVar=:name,
                                 XCType="sum", ZCType="sum", isYstd=true)
         # Shuffle the rows of Y
@@ -223,8 +223,8 @@ for i in 1:6
     
     # Compute mean and standard deviation of p-value proportions
     for j in 1:length(cutoffs) 
-        fpr[i,:] = Statistics.mean(propPvals, dims=1) 
-        fprSd[i,:] = Statistics.std(propPvals, dims=1) 
+        fpr[i,:] = mean(propPvals, dims=1) 
+        fprSd[i,:] = std(propPvals, dims=1) 
     end
     
     # Write proportions of p-values below cutoffs to CSV
