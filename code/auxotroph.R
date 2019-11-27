@@ -26,17 +26,6 @@ for (i in 1:6) {
   colnames(tStats[[i]]) = Znames[[i]]
 }
 
-# Read in MLM p-values
-pvals = lapply(1:6, function(i){
-  as.matrix(read.csv(paste("../processed/p", i, "_pvals.csv", sep=""),
-                     sep=",", header=FALSE))
-})
-# Use condition-concentrations and mutants for the interaction names
-for (i in 1:6) {
-  rownames(pvals[[i]]) = Xnames[[i]]
-  colnames(pvals[[i]]) = Znames[[i]]
-}
-
 
 # Indices of minimal media conditions for each plate
 minimalIdx = sapply(Xnames, function(x){grep("M9min", x)})
