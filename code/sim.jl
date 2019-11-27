@@ -187,7 +187,7 @@ for i in 1:6
     
     # Simulate interactions and response matrix
     Random.seed!(10+i)
-	  interactions, YSim = sim_data(X[:,[:Cond_Conc]], Z[:,[:name]], 
+	interactions, YSim = sim_data(X[:,[:Cond_Conc]], Z[:,[:name]], 
                                   :Cond_Conc, :name)
     
     # Put together RawData object for matrix linear models
