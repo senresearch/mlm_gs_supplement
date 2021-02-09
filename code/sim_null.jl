@@ -184,15 +184,15 @@ for i in 1:6
     # Read in data for each plate
     # Colony opacity
     Y = CSV.read(string("../processed/processed_KEIO_data/p", i, 
-                        "_krit_dat.csv"), delim=',', header=true) 
+                        "_krit_dat.csv"), DataFrame, delim=',', header=true) 
     
     # Conditions
     X = CSV.read(string("../processed/processed_KEIO_data/p", i, 
-                        "_krit_cond.csv"), delim=',', header=true) 
+                        "_krit_cond.csv"), DataFrame, delim=',', header=true) 
     
     # Mutant keys
     Z = CSV.read(string("../data/raw_KEIO_data/KEIO", i, 
-                        "_KEY.csv"), delim='\t', header=true) 
+                        "_KEY.csv"), DataFrame, delim='\t', header=true) 
     
     # Array for storing proportion of p-values below cutoffs
     propPvals = Array{Float64}(undef, nSim, length(cutoffs))
@@ -235,7 +235,9 @@ end
 # Write mean proportions and standard errors to CSV
 CSV.write(string("../processed/sim_null_fpr.csv"), 
           DataFrame(vcat(["plate" transpose(cutoffs)], 
-                    hcat(["1", "2", "3", "4", "5", "6"], fpr))), writeheader=false)
+                    hcat(["1", "2", "3", "4", "5", "6"], fpr))), 
+          writeheader=false)
 CSV.write(string("../processed/sim_null_fprSd.csv"), 
           DataFrame(vcat(["plate" transpose(cutoffs)], 
-                    hcat(["1", "2", "3", "4", "5", "6"], fprSd))), writeheader=false)
+                    hcat(["1", "2", "3", "4", "5", "6"], fprSd))), 
+          writeheader=false)

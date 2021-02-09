@@ -174,7 +174,7 @@ for i in 1:6
     # Read in data for each plate
     # Mutant keys
     Z = CSV.read(string("../data/raw_KEIO_data/KEIO", i, 
-                        "_KEY.csv"), delim='\t', header=true) 
+                        "_KEY.csv"), DataFrame, delim='\t', header=true) 
     
     # Simulate interactions, conditions and concentrations, and response matrix
     Random.seed!(10+i)

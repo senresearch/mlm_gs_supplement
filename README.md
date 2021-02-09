@@ -2,7 +2,7 @@ Supplemental code for ["Matrix linear models for high-throughput chemical geneti
 
 - Implemented in [Julia](https://julialang.org/downloads/) [^fn2] and [R](https://cran.r-project.org/mirrors.html) [^fn9]. 
 
-- Julia functions used to run matrix linear models for genetic screening data are provided in the [GeneticScreen](https://github.com/janewliang/GeneticScreen.jl) package, which is an extension of the [matrixLM](https://github.com/janewliang/matrixLM.jl) package. 
+- Julia functions used to run matrix linear models for genetic screening data are provided in the [GeneticScreen](https://github.com/senresearch/GeneticScreen.jl) package, which is an extension of the [matrixLM](https://github.com/senresearch/matrixLM.jl) package. 
 
 - Genetic screening data from Nichols et al. [^fn8] used for analysis is available [here](https://figshare.com/s/f7da693dee83595eafd7). Once downloaded, it should be saved in the `data/raw_KEIO_data/` directory. 
 
