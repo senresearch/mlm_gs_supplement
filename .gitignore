@@ -1,2 +1,3 @@
 syntax: glob
 *.Rhistory
+*.DS_Store
