@@ -2,7 +2,7 @@
 
 This repository contains code to reproduce the results presented in the paper ["Matrix linear models for high-throughput chemical genetic screens"](http://dx.doi.org/10.1534/genetics.119.302299). 
 
-Analysis was primarily performed in [Julia](https://julialang.org)<sup>[1](#myfootnote1)</sup> and visualizations in [R](https://www.r-project.org/)<sup>[2](#myfootnote2)</sup>. The Julia package associated with the paper is [`GeneticScreens`](https://github.com/senresearch/GeneticScreens.jl), which extends the [`MatrixLM`](https://github.com/senresearch/MatrixLM.jl) package. 
+Analysis was primarily performed in [Julia](https://julialang.org)<sup>[1](#myfootnote1)</sup>, and visualizations were created using [R](https://www.r-project.org/)<sup>[2](#myfootnote2)</sup>. The Julia package associated with this paper is [`GeneticScreens`](https://github.com/senresearch/GeneticScreens.jl), which extends the [`MatrixLM`](https://github.com/senresearch/MatrixLM.jl) package. 
 
 The genetic screening data from Nichols et al. (2011)<sup>[3](#myfootnote3)</sup> used for analysis is available [here](https://figshare.com/s/f7da693dee83595eafd7). Once downloaded, it should be saved in the `data/raw_KEIO_data/` directory. 
 
@@ -15,7 +15,7 @@ Running `auxotroph.R` additionally requires downloading the following tables and
 
 ## Data preprocessing
 
-- [`preprocess.R`](code/preprocess.R): Preprocess data from Nichols et al. (2011)<sup>[3](#myfootnote3)</sup>. Requires data downloaded and saved to `data/raw_KEIO_data/`, and should be run before any of the other files. 
+- [`preprocess.R`](code/preprocess.R): Preprocess data from Nichols et al. (2011)<sup>[3](#myfootnote3)</sup>. Requires the data downloaded and saved to `data/raw_KEIO_data/`, and should be run before any of the other files. 
 
 
 ## Compare runtimes
