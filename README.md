@@ -13,7 +13,7 @@ Running `auxotroph.R` additionally requires downloading the following tables and
 - [Supplemental Table 3](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5464397/bin/NIHMS72934-supplement-Supplementary_table_3.zip) in Kritikos et al. (2017)<sup>[5](#myfootnote5)</sup>
 
 
-## Preprocessing data
+## Data preprocessing
 
 - [`preprocess.R`](code/preprocess.R): Preprocess data from Nichols et al. (2011)<sup>[3](#myfootnote3)</sup>. Requires data downloaded and saved to `data/raw_KEIO_data/`, and should be run before any of the other files. 
 
