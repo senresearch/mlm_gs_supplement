@@ -2,14 +2,15 @@
 
 This repository contains code to reproduce the results presented in the paper ["Matrix linear models for high-throughput chemical genetic screens"](http://dx.doi.org/10.1534/genetics.119.302299). 
 
-Analysis was primarily performed in [Julia](https://julialang.org)<sup>[1](#myfootnote1)</sup> and visualizations in [R](https://www.r-project.org/)<sup>[2](#myfootnote2)</sup>. The Julia package associated with the paper is [`GeneticScreens`](https://github.com/senresearch/GeneticScreens.jl), which extends the `MatrixLM`](https://github.com/senresearch/MatrixLM.jl) package. 
+Analysis was primarily performed in [Julia](https://julialang.org)<sup>[1](#myfootnote1)</sup> and visualizations in [R](https://www.r-project.org/)<sup>[2](#myfootnote2)</sup>. The Julia package associated with the paper is [`GeneticScreens`](https://github.com/senresearch/GeneticScreens.jl), which extends the [`MatrixLM`](https://github.com/senresearch/MatrixLM.jl) package. 
 
-Genetic screening data from Nichols et al. (2011)<sup>[3](#myfootnote3)</sup> used for analysis is available [here](https://figshare.com/s/f7da693dee83595eafd7). Once downloaded, it should be saved in the `data/raw_KEIO_data/` directory. 
+The genetic screening data from Nichols et al. (2011)<sup>[3](#myfootnote3)</sup> used for analysis is available [here](https://figshare.com/s/f7da693dee83595eafd7). Once downloaded, it should be saved in the `data/raw_KEIO_data/` directory. 
 
 Running `auxotroph.R` additionally requires downloading the following tables and saving them as CSVs in the `data/` directory. 
-    - [Supplemental Table 4](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3060659/bin/NIHMS261392-supplement-04.xls) in Nichols et al. (2011)<sup>[3](#myfootnote3)</sup>
-    - [Supplemental Table 1](http://systemsbiology.ucsd.edu/publications/supplemental_material/JBact2006/) in Joyce et al. (2006)<sup>[4](#myfootnote4)</sup>
-    - [Supplemental Table 3](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5464397/bin/NIHMS72934-supplement-Supplementary_table_3.zip) in Kritikos et al. (2017)<sup>[5](#myfootnote5)</sup>
+
+- [Supplemental Table 4](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3060659/bin/NIHMS261392-supplement-04.xls) in Nichols et al. (2011)<sup>[3](#myfootnote3)</sup>
+- [Supplemental Table 1](http://systemsbiology.ucsd.edu/publications/supplemental_material/JBact2006/) in Joyce et al. (2006)<sup>[4](#myfootnote4)</sup>
+- [Supplemental Table 3](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5464397/bin/NIHMS72934-supplement-Supplementary_table_3.zip) in Kritikos et al. (2017)<sup>[5](#myfootnote5)</sup>
 
 
 ## Preprocessing data
@@ -22,9 +23,9 @@ Running `auxotroph.R` additionally requires downloading the following tables and
 - [`compare_times.jl`](code/compare_times.jl): Compare the runtimes for matrix linear models and Collins et al. (2006)<sup>[6](#myfootnote6)</sup>'s S scores. 
 
 
-## Analysis with annotations encoded as dosage-response and condition-concentration
+## Data analysis
 
-- [`dosage.jl`](code/dosage.jl): Run matrix linear models (dosage-response and condition-concentrations) and S scores (condition-concentrations) on Nichols et al. (2011)'s<sup>[3](#myfootnote3)</sup> data. 
+- [`dosage.jl`](code/dosage.jl): Run matrix linear models (dosage-response and condition-concentrations) and S scores (condition-concentrations) on Nichols et al. (2011)<sup>[3](#myfootnote3)</sup>'s data. 
 
 - [`auxotroph.R`](code/auxotroph.R`): Reproduce plots to check for auxotrophs against the lists provided by Supplemental Table 4 in Nichols et al. (2011)<sup>[3](#myfootnote3)</sup> and Supplemental Table 1 in Joyce et al. (2006)<sup>[4](#myfootnote4)</sup>, as well as analysis of Kritikos et al. (2017)<sup>[5](#myfootnote5)</sup>'s S scores (Supplemental Table 3). 
 
