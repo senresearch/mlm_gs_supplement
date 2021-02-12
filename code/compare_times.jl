@@ -5,7 +5,7 @@ using Random
 using CSV
 
 # Matrix linear models for genetic screening data
-@everywhere using GeneticScreen
+@everywhere using GeneticScreens
 
 
 # Number of replicates
